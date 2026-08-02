@@ -26,11 +26,10 @@
     <!-- ノート編集エリア -->
     <template v-if="store.selectedNote">
       <!-- ヘッダー -->
-      <div class="h-16 flex items-center justify-between px-6 shrink-0 z-10 transition-all duration-200">
+      <div class="h-14 flex items-center justify-between px-6 shrink-0 z-10 transition-all duration-200">
         <div class="flex items-center gap-2 md:gap-3">
           <!-- 戻るボタン（モバイル） -->
           <button
-            v-show="!store.isEditingContent"
             @click="store.setMobileView('sidebar')"
             class="p-2 -ml-2 text-slate-600 hover:bg-white/60 rounded-xl md:hidden transition-colors shadow-sm border border-white/50 focus:ring-2 focus:ring-sky-300"
           >
@@ -41,7 +40,6 @@
 
           <!-- 日付バッジ -->
           <div
-            v-show="!store.isEditingContent"
             class="hidden md:flex items-center text-[13px] font-medium text-slate-500 bg-white/60 backdrop-blur-md px-3 py-1.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.03)] border border-white"
           >
             <span class="w-1.5 h-1.5 rounded-full bg-sky-400 mr-2"></span>
@@ -49,7 +47,7 @@
           </div>
 
           <!-- フォルダ移動ドロップダウン -->
-          <div v-show="!store.isEditingContent" class="relative flex items-center">
+          <div class="relative flex items-center">
             <span class="absolute left-2.5 text-sky-500 pointer-events-none w-4 h-4 flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none">
                 <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/>
@@ -68,15 +66,6 @@
               </svg>
             </span>
           </div>
-
-          <!-- 完了ボタン（編集中） -->
-          <!-- <button
-            v-if="store.isEditingContent"
-            @click="store.stopEditing()"
-            class="fade-enter-active px-5 py-2 bg-gradient-to-tr from-sky-500 to-blue-500 text-white shadow-lg shadow-sky-500/20 hover:shadow-sky-500/40 font-bold rounded-xl transition-all text-sm hover:-translate-y-0.5"
-          >
-            完了
-          </button> -->
         </div>
 
         <!-- 削除ボタン -->
@@ -95,14 +84,14 @@
       </div>
 
       <!-- エディタ本体 -->
-      <div class="flex-1 px-6 md:px-16 py-6 select-text overflow-y-auto no-scrollbar flex flex-col z-10 relative">
-        <div class="max-w-3xl mx-auto w-full flex-1 flex flex-col relative">
+      <div class="flex-1 px-4 md:px-8 pt-3 pb-5 select-text overflow-y-auto no-scrollbar flex flex-col z-10 relative">
+        <div class="max-w-6xl mx-auto w-full flex-1 flex flex-col relative">
 
           <!-- タイトル -->
-          <div class="mb-4 p-4 transition-all rounded-xl focus-within:bg-white focus-within:shadow-[0_8px_30px_rgba(0,0,0,0.04)] focus-within:border focus-within:border-white">
+          <div class="mb-2 px-6 md:px-8 py-2 transition-all rounded-xl bg-white focus-within:shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
             <input
               type="text"
-              class="w-full text-3xl md:text-4xl font-bold border-none outline-none bg-transparent text-slate-800 placeholder-slate-300 focus:ring-0 p-0 tracking-tight"
+              class="w-full text-2xl md:text-3xl font-bold border-none outline-none bg-transparent text-slate-800 placeholder-slate-300 focus:ring-0 p-0 tracking-tight leading-tight"
               placeholder="タイトル..."
               :value="store.selectedNote.title"
               @blur="store.updateNoteTitle(store.selectedNoteId, $event.target.value)"
@@ -110,7 +99,7 @@
           </div>
 
           <!-- URLチップ（編集中のみ） -->
-          <div
+          <!-- <div
             v-if="store.isEditingContent && linkChips.length > 0"
             class="mb-6 flex flex-wrap gap-2 px-2 fade-enter-active"
           >
@@ -129,19 +118,18 @@
               </svg>
               <span class="truncate max-w-[200px] md:max-w-[300px]">{{ url }}</span>
             </a>
-          </div>
+          </div> -->
 
           <!-- コンテンツエリア -->
           <div
-            class="flex-1 flex flex-col cursor-text rounded-xl transition-all duration-300"
-            :class="store.isEditingContent ? 'editing-active' : ''"
+            class="flex-1 flex flex-col cursor-text rounded-xl transition-all duration-300 editing-active"
             @click="store.startEditing()"
           >
             <!-- テキストエリア（編集中） -->
             <textarea
               v-if="store.isEditingContent"
               ref="textareaRef"
-              class="w-full flex-1 min-h-[300px] border-none outline-none resize-none bg-transparent focus:ring-0 text-[1.05rem] md:text-[1.1rem] leading-[1.8] text-slate-700 p-6 md:p-8"
+              class="w-full flex-1 min-h-[300px] border-none outline-none resize-none bg-transparent focus:ring-0 text-[1.05rem] md:text-[1.1rem] leading-[1.8] text-slate-700 px-6 py-4 md:px-8 md:py-5"
               placeholder="ここにアイデアを書き留めましょう..."
               :value="store.selectedNote.content"
               @blur="store.updateNoteContent(store.selectedNoteId, $event.target.value)"
@@ -150,7 +138,7 @@
             <!-- 表示モード -->
             <div
               v-else
-              class="w-full flex-1 pb-40 text-[1.05rem] md:text-[1.1rem] leading-[1.8] text-slate-700 p-4 md:p-6 whitespace-pre-wrap break-words"
+              class="w-full flex-1 text-[1.05rem] md:text-[1.1rem] leading-[1.8] text-slate-700 px-6 py-4 md:px-8 md:py-5 whitespace-pre-wrap break-words"
               v-html="linkify(store.selectedNote.content)"
             ></div>
           </div>

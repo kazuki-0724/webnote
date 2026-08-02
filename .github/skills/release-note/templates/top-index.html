@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>リリースノート一覧 - WebNote</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            color: #1f2937;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+    <div class="max-w-3xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+        <header class="mb-12 text-center">
+            <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
+                リリースノート
+            </h1>
+            <p class="mt-4 text-lg text-gray-500">
+                WebNote の最新のアップデート、新機能、バグ修正の履歴
+            </p>
+        </header>
+
+        <main class="space-y-6">
+            {$release_entries}
+        </main>
+
+        <footer class="mt-16 text-center border-t border-gray-200 pt-8">
+            <p class="text-sm text-gray-500">
+                &copy; 2026 hogehoge Inc. All rights reserved.
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

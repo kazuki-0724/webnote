@@ -11,7 +11,7 @@
             <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
           </svg>
         </div>
-        <h1 class="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 tracking-tight flex-1">Idea Notes</h1>
+        <h1 class="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 tracking-tight flex-1">WebNote</h1>
         <!-- 新規フォルダボタン -->
         <button
           @click="startCreateFolder"

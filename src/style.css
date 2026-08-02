@@ -27,7 +27,7 @@ textarea:focus, input:focus { outline: none; }
 
 /* エディタのアクティブ状態 */
 .editing-active {
-  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2), 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
   background-color: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px);
 }
