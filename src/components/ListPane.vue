@@ -26,11 +26,7 @@
         class="flex flex-col items-center justify-center h-full text-slate-400 p-6 text-center mt-20"
       >
         <div class="opacity-40 text-sky-400 mb-6">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-            <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>
-          </svg>
+          <FileLines />
         </div>
         <p class="text-[15px] font-medium">ノートがありません</p>
         <p class="text-sm mt-1 opacity-70">右下のボタンから作成できます</p>
@@ -58,17 +54,6 @@
         </div>
       </div>
     </div>
-
-    <!-- 新規作成 FAB -->
-    <button
-      @click="store.openCreateNoteModal()"
-      class="absolute bottom-8 right-6 w-14 h-14 bg-gradient-to-tr from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white rounded-2xl shadow-[0_8px_20px_-6px_rgba(14,165,233,0.6)] hover:shadow-[0_12px_24px_-6px_rgba(14,165,233,0.7)] transition-all flex items-center justify-center active:scale-90 focus:ring-4 focus:ring-sky-300/50 focus:outline-none z-20 hover:-translate-y-1"
-      title="新規作成"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M5 12h14"/><path d="M12 5v14"/>
-      </svg>
-    </button>
   </div>
 </template>
 
@@ -76,6 +61,7 @@
 import { computed } from 'vue'
 import { useNotesStore } from '../store/notes'
 import { formatDate } from '../utils'
+import FileLines from '../assets/icons/file-lines-solid-full.svg'
 
 const store = useNotesStore()
 

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>リリースノート</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            color: #1f2937;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+    <div class="max-w-3xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+        <header class="mb-12 text-center">
+            <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
+                リリースノート
+            </h1>
+            <p class="mt-4 text-lg text-gray-500">
+                WebNote バージョン <span class="font-bold text-blue-600">0.0.2</span> の更新内容
+            </p>
+            <p class="mt-2 text-sm text-gray-400">
+                リリース日: 2026-08-11 19:12:12
+            </p>
+        </header>
+
+        <main class="space-y-8">
+            <section class="bg-blue-50 p-6 rounded-2xl border border-blue-100 mb-8">
+                <h2 class="text-xl font-bold text-blue-900 mb-3">リリース概要</h2>
+                <p class="text-blue-800 text-sm leading-relaxed">
+                    WebMCP対応を行い、アプリ起動時に WebMCP ツール登録を実行するよう更新しました。あわせて SVG アイコンコンポーネント化、Vite への SVG ローダー追加、不要な Firestore テストコンポーネント削除を実施し、UI と構成を整理しました。
+                </p>
+            </section>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">README.md</h2>
+                    <p class="text-sm text-gray-500 mt-1">プロジェクトの概要と開発・デプロイ手順を記載するドキュメントです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span><p class="text-gray-700 text-sm">なし</p></div>
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span><p class="text-gray-700 text-sm">末尾改行に伴う軽微なテキスト差分を反映しました。</p></div>
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span><p class="text-gray-700 text-sm">なし</p></div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">index.html</h2>
+                    <p class="text-sm text-gray-500 mt-1">Web アプリの HTML エントリーポイントです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span><p class="text-gray-700 text-sm">favicon の SVG 指定と Font Awesome CDN 読み込みを追加しました。</p></div>
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span><p class="text-gray-700 text-sm">head 内のメタ・リンク構成をアイコン運用向けに更新しました。</p></div>
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span><p class="text-gray-700 text-sm">なし</p></div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">package-lock.json</h2>
+                    <p class="text-sm text-gray-500 mt-1">依存関係ツリーの固定バージョンを管理するロックファイルです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span><p class="text-gray-700 text-sm">vite-svg-loader 導入に必要な svgo、css-select などの関連依存を追加しました。</p></div>
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span><p class="text-gray-700 text-sm">ルートの開発依存関係に vite-svg-loader を含むロック情報へ更新しました。</p></div>
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span><p class="text-gray-700 text-sm">なし</p></div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">package.json</h2>
+                    <p class="text-sm text-gray-500 mt-1">npm スクリプトと依存関係を定義する設定ファイルです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span><p class="text-gray-700 text-sm">devDependencies に vite-svg-loader を追加しました。</p></div>
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span><p class="text-gray-700 text-sm">Vite のプラグイン拡張に対応する依存構成へ調整しました。</p></div>
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span><p class="text-gray-700 text-sm">なし</p></div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">src/components/EditorPane.vue</h2>
+                    <p class="text-sm text-gray-500 mt-1">ノート本文の閲覧・編集 UI を提供するコンポーネントです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span><p class="text-gray-700 text-sm">NoteIcon、ArrowLeftIcon、ChevronDownIcon、TrashCanIcon の SVG コンポーネント import を追加しました。</p></div>
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span><p class="text-gray-700 text-sm">インライン SVG をアイコンコンポーネント呼び出しへ置換し、UI アイコン描画を共通化しました。</p></div>
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span><p class="text-gray-700 text-sm">コメントアウトされた URL チップ表示ブロックを削除しました。</p></div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">src/components/ListPane.vue</h2>
+                    <p class="text-sm text-gray-500 mt-1">ノート一覧と選択状態を表示するリストペインです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span><p class="text-gray-700 text-sm">一覧の空状態アイコンとして FileLines コンポーネント import を追加しました。</p></div>
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span><p class="text-gray-700 text-sm">空状態のインライン SVG をコンポーネント化したアイコンに置換しました。</p></div>
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span><p class="text-gray-700 text-sm">右下の新規作成 FAB ボタンとその SVG マークアップを削除しました。</p></div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">src/components/SidebarPane.vue</h2>
+                    <p class="text-sm text-gray-500 mt-1">フォルダナビゲーションと検索入力を持つサイドバーです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span><p class="text-gray-700 text-sm">Favicon、SearchIcon、PlusIcon の SVG コンポーネント import を追加しました。</p></div>
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span><p class="text-gray-700 text-sm">ヘッダーと検索欄のアイコン描画をインライン SVG からコンポーネント化し、検索アイコンの配置クラスを調整しました。</p></div>
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span><p class="text-gray-700 text-sm">複数のインライン SVG マークアップを削除しました。</p></div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">src/components/TestFirestore.vue</h2>
+                    <p class="text-sm text-gray-500 mt-1">Firestore 接続を手動確認するためのテスト用コンポーネントです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span><p class="text-gray-700 text-sm">なし</p></div>
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span><p class="text-gray-700 text-sm">なし</p></div>
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span><p class="text-gray-700 text-sm">Firestore 書き込み/読み込み確認 UI を含むファイル全体を削除しました。</p></div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">src/main.js</h2>
+                    <p class="text-sm text-gray-500 mt-1">Vue アプリの起動処理を行うエントリースクリプトです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span><p class="text-gray-700 text-sm">registerWebMCPTools の import と実行呼び出しを追加しました。</p></div>
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span><p class="text-gray-700 text-sm">アプリマウント後に WebMCP ツール登録を行う起動フローへ更新しました。</p></div>
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span><p class="text-gray-700 text-sm">なし</p></div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">vite.config.js</h2>
+                    <p class="text-sm text-gray-500 mt-1">Vite のビルド設定とプラグイン構成を定義する設定ファイルです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span><p class="text-gray-700 text-sm">vite-svg-loader の import とプラグイン登録を追加しました。</p></div>
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span><p class="text-gray-700 text-sm">plugins 配列を複数行化し、Vue プラグインと SVG ローダーを併用する構成へ変更しました。</p></div>
+                    <div class="flex items-start"><span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span><p class="text-gray-700 text-sm">なし</p></div>
+                </div>
+            </article>
+        </main>
+
+        <footer class="mt-16 text-center border-t border-gray-200 pt-8">
+            <p class="text-sm text-gray-500">
+                &copy; 2026 hogehoge Inc. All rights reserved.
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

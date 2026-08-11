@@ -1,16 +1,12 @@
 <template>
   <div
-    class="flex flex-col shrink-0 bg-white/40 backdrop-blur-xl border-r border-white/60 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.08)] z-20 transition-all duration-300"
+    class="flex-col shrink-0 bg-white/40 backdrop-blur-xl border-r border-white/60 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.08)] z-20 transition-all duration-300"
     :class="mobileVisible ? 'flex w-full md:w-80' : 'hidden md:flex md:w-80'"
   >
     <!-- ===== ヘッダー ===== -->
     <div class="px-5 pt-5 pb-3 shrink-0">
       <div class="flex items-center gap-3 mb-5">
-        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center shadow-lg shadow-sky-500/30 text-white shrink-0">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
-          </svg>
-        </div>
+        <Favicon width="30" height="30" alt="WebNote"/>
         <h1 class="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 tracking-tight flex-1">WebNote</h1>
         <!-- 新規フォルダボタン -->
         <button
@@ -18,18 +14,15 @@
           title="新規フォルダ"
           class="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-sky-300"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 12h14"/><path d="M12 5v14"/>
-          </svg>
+          <PlusIcon alt="新規フォルダ"/>
         </button>
       </div>
 
       <!-- 検索バー -->
       <div class="relative group z-50">
-        <span class="absolute left-3.5 top-3 text-slate-400 transition-colors group-focus-within:text-sky-500 pointer-events-none">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
-          </svg>
+        <span class="absolute left-3.5 top-0 bottom-0 z-10 flex items-center justify-center text-slate-400 transition-colors group-focus-within:text-sky-500 pointer-events-none">
+          <!-- 💡 修正2: クラスでサイズ(w-4 h-4)を指定 -->
+          <SearchIcon class="w-4 h-4" />
         </span>
         <input
           type="text"
@@ -218,6 +211,9 @@ import { ref, nextTick, computed } from 'vue'
 import { useNotesStore } from '../store/notes'
 import SearchSuggestions from './SearchSuggestions.vue'
 import { formatDate } from '../utils'
+import Favicon from '../assets/icons/favicon.svg'
+import SearchIcon from '../assets/icons/magnifying-glass-solid-full.svg'
+import PlusIcon from '../assets/icons/square-plus-regular-full.svg'
 
 const store = useNotesStore()
 

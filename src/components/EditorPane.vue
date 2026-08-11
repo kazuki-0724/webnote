@@ -10,13 +10,7 @@
     <div v-if="!store.selectedNote" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 z-10">
       <div class="w-32 h-32 bg-white/50 rounded-[2rem] shadow-xl shadow-slate-200/50 flex items-center justify-center mb-8 border border-white">
         <div class="text-sky-400/80">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/>
-            <line x1="10" y1="9" x2="8" y2="9"/>
-          </svg>
+          <NoteIcon class="w-18 h-18" />
         </div>
       </div>
       <p class="text-xl font-bold text-slate-500 tracking-tight">ノートを選択</p>
@@ -33,9 +27,7 @@
             @click="store.setMobileView('sidebar')"
             class="p-2 -ml-2 text-slate-600 hover:bg-white/60 rounded-xl md:hidden transition-colors shadow-sm border border-white/50 focus:ring-2 focus:ring-sky-300"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
-            </svg>
+            <ArrowLeftIcon class="w-5 h-5" />
           </button>
 
           <!-- 日付バッジ -->
@@ -61,9 +53,7 @@
               <option v-for="f in store.folders" :key="f.id" :value="f.id">{{ f.name }}</option>
             </select>
             <span class="absolute right-2 text-slate-400 pointer-events-none">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m6 9 6 6 6-6"/>
-              </svg>
+              <ChevronDownIcon class="w-4 h-4" />
             </span>
           </div>
         </div>
@@ -75,11 +65,7 @@
           class="p-2.5 text-slate-400 hover:text-red-500 hover:bg-white rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-red-300 shadow-sm border border-transparent hover:border-white"
           title="削除"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-            <line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>
-          </svg>
+          <TrashCanIcon class="w-5 h-5" />
         </button>
       </div>
 
@@ -97,29 +83,6 @@
               @blur="store.updateNoteTitle(store.selectedNoteId, $event.target.value)"
             />
           </div>
-
-          <!-- URLチップ（編集中のみ） -->
-          <!-- <div
-            v-if="store.isEditingContent && linkChips.length > 0"
-            class="mb-6 flex flex-wrap gap-2 px-2 fade-enter-active"
-          >
-            <a
-              v-for="url in linkChips"
-              :key="url"
-              :href="url"
-              target="_blank"
-              rel="noopener noreferrer"
-              @click.stop
-              class="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur text-sky-600 hover:bg-white hover:text-sky-700 text-sm font-bold rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-white/50 transition-all hover:shadow-[0_4px_12px_rgba(14,165,233,0.15)] hover:-translate-y-0.5"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-              </svg>
-              <span class="truncate max-w-[200px] md:max-w-[300px]">{{ url }}</span>
-            </a>
-          </div> -->
-
           <!-- コンテンツエリア -->
           <div
             class="flex-1 flex flex-col cursor-text rounded-xl transition-all duration-300 editing-active"
@@ -153,6 +116,10 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import { useNotesStore } from '../store/notes'
 import { formatDate, linkify, extractUrls } from '../utils'
+import NoteIcon from '../assets/icons/note-icon.svg'
+import ArrowLeftIcon from '../assets/icons/arrow-left-solid-full.svg'
+import ChevronDownIcon from '../assets/icons/chevron-down-solid-full.svg'
+import TrashCanIcon from '../assets/icons/trash-can-solid-full.svg'
 
 const store = useNotesStore()
 const textareaRef = ref(null)
