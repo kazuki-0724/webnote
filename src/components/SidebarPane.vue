@@ -8,6 +8,12 @@
       <div class="flex items-center gap-3 mb-5">
         <Favicon width="30" height="30" alt="WebNote"/>
         <h1 class="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 tracking-tight flex-1">WebNote</h1>
+
+        <div v-if="showAuthBadge" class="md:hidden flex items-center gap-2 rounded-full bg-slate-900/5 px-2 py-1 text-[10px] font-medium text-slate-600 border border-slate-200/80">
+          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+          <span>{{ authUser?.displayName || 'Google User' }}</span>
+        </div>
+
         <!-- 新規フォルダボタン -->
         <button
           @click="startCreateFolder"
@@ -207,21 +213,31 @@
 </template>
 
 <script setup>
-import { ref, nextTick, computed } from 'vue'
+import { ref, nextTick, computed, onMounted } from 'vue'
+import { onAuthStateChanged } from 'firebase/auth'
+import { auth } from '../firebase'
 import { useNotesStore } from '../store/notes'
 import SearchSuggestions from './SearchSuggestions.vue'
-import { formatDate } from '../utils'
+import { formatDate } from '../utils/noteUtil.js'
 import Favicon from '../assets/icons/favicon.svg'
 import SearchIcon from '../assets/icons/magnifying-glass-solid-full.svg'
 import PlusIcon from '../assets/icons/square-plus-regular-full.svg'
 
 const store = useNotesStore()
 
+const authUser = ref(null)
 const searchFocused = ref(false)
 const newFolderName = ref('')
 const newFolderInput = ref(null)
 
 const mobileVisible = computed(() => store.mobileView === 'sidebar')
+const showAuthBadge = computed(() => !!authUser.value && mobileVisible.value)
+
+onMounted(() => {
+  onAuthStateChanged(auth, (user) => {
+    authUser.value = user
+  })
+})
 
 function handleSearchBlur() {
   setTimeout(() => {

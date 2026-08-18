@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>リリースノート</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            color: #1f2937;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+    <div class="max-w-3xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+        <header class="mb-12 text-center">
+            <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
+                リリースノート
+            </h1>
+            <p class="mt-4 text-lg text-gray-500">
+                WebNote バージョン <span class="font-bold text-blue-600">0.0.3</span> の更新内容
+            </p>
+            <p class="mt-2 text-sm text-gray-400">
+                リリース日: 2026-08-19 12:00:00
+            </p>
+        </header>
+
+        <main class="space-y-8">
+            <section class="bg-blue-50 p-6 rounded-2xl border border-blue-100 mb-8">
+                <h2 class="text-xl font-bold text-blue-900 mb-3">リリース概要</h2>
+                <p class="text-blue-800 text-sm leading-relaxed">
+                    Google アカウントでのログインを追加し、認証状態の保存と初期化を一元化しました。未認証時はログイン画面を表示し、認証後にノートとフォルダの同期を開始する流れへ整理しました。あわせて Firestore のコレクション定数化やリアルタイム購読の導入により、データ更新の反映を安定化しています。
+                </p>
+            </section>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">package.json</h2>
+                    <p class="text-sm text-gray-500 mt-1">npm の依存関係とスクリプトを定義するプロジェクト設定です。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span>
+                        <p class="text-gray-700 text-sm">Google 認証のクッキー保持に必要な js-cookie を依存関係へ追加しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">認証関連の導入に合わせて依存関係を更新しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">package-lock.json</h2>
+                    <p class="text-sm text-gray-500 mt-1">依存関係ツリーの固定バージョン情報を保持するロックファイルです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span>
+                        <p class="text-gray-700 text-sm">js-cookie の package 定義と lock 情報を追加しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">依存解決のバージョン情報を更新し、認証機能導入後の状態に合わせました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">src/App.vue</h2>
+                    <p class="text-sm text-gray-500 mt-1">アプリ全体のルート画面と認証フローの制御を担うコンポーネントです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span>
+                        <p class="text-gray-700 text-sm">認証確認中のローディング画面と Google ログイン用の Login コンポーネントを追加しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">未認証時はログイン画面、認証済み時は通常のノート画面へ切り替わる状態制御と、ログイン/ログアウト時のストア初期化を追加しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">src/components/Login.vue</h2>
+                    <p class="text-sm text-gray-500 mt-1">Google ログインの入口となる専用のログイン UI です。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span>
+                        <p class="text-gray-700 text-sm">WebNote ロゴと Google でログインするボタンを含むシンプルなログイン画面を新規作成しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">ログイン中の表示状態とイベント発火を管理する props / emits を定義しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">src/components/SidebarPane.vue</h2>
+                    <p class="text-sm text-gray-500 mt-1">現在のユーザー状態を表示するサイドバー UI です。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span>
+                        <p class="text-gray-700 text-sm">モバイル端末時の認証ユーザー表示バッジを追加しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">Firebase の auth 状態変更を購読し、現在のユーザー名を UI に反映するよう修正しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">src/composables/useAuth.js</h2>
+                    <p class="text-sm text-gray-500 mt-1">認証状態の初期化、ログイン、ログアウトをまとめて管理するコンポーザブルです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span>
+                        <p class="text-gray-700 text-sm">useAuth を新規作成し、initializeAuth / loginWithGoogle / logoutWithGoogle の状態管理を追加しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">Google 認証後にセッション Cookie を設定し、認証済み状態をアプリ側で再利用できるようにしました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">src/constrants/firestore.js</h2>
+                    <p class="text-sm text-gray-500 mt-1">Firestore のコレクション名を共通化する定数定義です。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span>
+                        <p class="text-gray-700 text-sm">NOTES と FOLDERS のコレクション定数を新規追加しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">Firestore 参照のハードコードを避け、設定値の再利用を可能にしました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">src/firebase.js</h2>
+                    <p class="text-sm text-gray-500 mt-1">Firebase 初期化と Google 認証の設定をまとめた共通モジュールです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span>
+                        <p class="text-gray-700 text-sm">getAuth、GoogleAuthProvider、signInWithPopup、signOut を追加し、Google ログイン API を組み込みました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">Firebase App の初期化を一箇所に集約し、認証と Firestore を同じ app で扱えるように整理しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">src/repositories/folderRepository.js</h2>
+                    <p class="text-sm text-gray-500 mt-1">フォルダの取得と保存を担うデータアクセス層です。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span>
+                        <p class="text-gray-700 text-sm">onSnapshot によるフォルダ更新購読を追加し、リアルタイム同期の仕組みを持たせました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">コレクション名を定数化し、データ更新時に同一のコレクション参照を使うよう統一しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">src/repositories/notesRepository.js</h2>
+                    <p class="text-sm text-gray-500 mt-1">ノートの取得・更新・削除とリアルタイム同期を扱うリポジトリです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span>
+                        <p class="text-gray-700 text-sm">subscribeToNotes と subscribeToNote を追加して、一覧と単一ノートの変更を監視できるようにしました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">Firestore コレクション名のハードコードを削減し、認証済みユーザーが使う状態で同期を安全に開始できるよう整理しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">src/store/notes.js</h2>
+                    <p class="text-sm text-gray-500 mt-1">ノートとフォルダの状態をまとめて保持する状態管理層です。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span>
+                        <p class="text-gray-700 text-sm">unsubscribeNotes / unsubscribeFolders と stopNotesSync を追加し、認証解除時に同期を停止できるようにしました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">fetch 系のところを subscribe ベースの同期に置換し、認証状態に応じてリアルタイム更新を開始・終了するフローを追加しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">src/utils/authCookie.js</h2>
+                    <p class="text-sm text-gray-500 mt-1">認証状態を保持する Cookie の読み書きを担当するユーティリティです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span>
+                        <p class="text-gray-700 text-sm">ログイン状態を 7 日間保持する Cookie の設定・検証・削除関数を新規作成しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">認証成功時とログアウト時に Cookie を同期することで、再訪問時のログイン状態を制御できるようにしました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">src/utils/noteUtil.js</h2>
+                    <p class="text-sm text-gray-500 mt-1">ノート本文の文字列処理をまとめるユーティリティファイルです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span>
+                        <p class="text-gray-700 text-sm">src/utils.js を src/utils/noteUtil.js として整理し、関連 import の解決を明示しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">EditorPane と SidebarPane の import 先を新しいユーティリティパスへ修正しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">旧ディレクトリの utils.js 参照を整理しました。</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800">src/components/EditorPane.vue</h2>
+                    <p class="text-sm text-gray-500 mt-1">ノート本文の編集 UI と本文処理の呼び出しを担当するコンポーネントです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">時間フォーマットや URL 変換のユーティリティ import を noteUtil へ更新しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+        </main>
+
+        <footer class="mt-16 text-center border-t border-gray-200 pt-8">
+            <p class="text-sm text-gray-500">
+                &copy; 2026 hogehoge Inc. All rights reserved.
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

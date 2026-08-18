@@ -115,7 +115,7 @@
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
 import { useNotesStore } from '../store/notes'
-import { formatDate, linkify, extractUrls } from '../utils'
+import { formatDate, linkify, extractUrls } from '../utils/noteUtil'
 import NoteIcon from '../assets/icons/note-icon.svg'
 import ArrowLeftIcon from '../assets/icons/arrow-left-solid-full.svg'
 import ChevronDownIcon from '../assets/icons/chevron-down-solid-full.svg'

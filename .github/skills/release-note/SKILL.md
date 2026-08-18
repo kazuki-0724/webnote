@@ -28,26 +28,30 @@ git の比較範囲は毎回手探りにせず、固定コマンドを使いま�
 
 ## Procedure
 1. 固定 git コマンドで差分ファイル一覧と差分本文を取得します。
-2. 差分ファイルを追加・変更・削除の種類ごとに分類します。
-3. 各ファイルについて、ファイル名、役割、差分要約を整理します。
-4. 全体向けにバージョン、リリース日、概要をまとめます。
-5. [./templates/index.html](./templates/index.html) をベースに、詳細ページの HTML を生成します。
-6. [./templates/top-index.html](./templates/top-index.html) をベースに、一覧ページを更新します。
-7. 生成した HTML を release-notes 配下の日時フォルダに配置します。
-8. [./scripts/check-release-note-placeholders.mjs](./scripts/check-release-note-placeholders.mjs) を実行し、未置換プレースホルダーの有無だけを確認します。
-9. スクリプト結果をそのまま共有し、未置換があっても追加作業は勝手に進めません。
+2. 追加・変更・削除に加え、未追跡または新規作成のファイルを別途確認し、対象に含めます。
+3. 差分ファイルを追加・変更・削除の種類ごとに分類します。特に `??` または `A` のファイルは「新規追加ファイル」として扱い、本文がない場合でもファイル名と役割を確認して要約します。
+4. 各ファイルについて、ファイル名、役割、差分要約を整理します。
+5. 全体向けにバージョン、リリース日、概要をまとめます。
+6. [./templates/index.html](./templates/index.html) をベースに、詳細ページの HTML を生成します。
+7. [./templates/top-index.html](./templates/top-index.html) をベースに、一覧ページを更新します。
+8. 生成した HTML を release-notes 配下の日時フォルダに配置します。
+9. [./scripts/check-release-note-placeholders.mjs](./scripts/check-release-note-placeholders.mjs) を実行し、未置換プレースホルダーの有無だけを確認します。
+10. スクリプト結果をそのまま共有し、未置換があっても追加作業は勝手に進めません。
 
 ## Detailed Rules
 
 ### 1. Diff Analysis
-- 変更内容は必ず git diff に基づいて記述します。
-- 差分取得コマンドは次の 2 つに固定します。
+- 変更内容は必ず git diff と git status に基づいて記述します。
+- 差分取得コマンドは次の 3 つを組み合わせて固定します。
 - `git diff --name-status HEAD -- . ':(exclude).github/**'`
 - `git diff --find-renames --find-copies --unified=0 HEAD -- . ':(exclude).github/**'`
-- これにより、HEAD 基準でステージ済みと未ステージ済みの tracked changes をまとめて取得します。
+- `git status --short --untracked-files=all -- . ':(exclude).github/**'`
+- これにより、HEAD 基準でステージ済みと未ステージ済みの tracked changes をまとめて取得し、未追跡ファイル (`??`) と新規追加ファイル (`A`) を漏れなく確認します。
+- 新規作成ファイルが `git diff HEAD` に現れないことを前提に、`git status --short` の結果を追加で確認し、そこに含まれる新規ファイルを必ずリリースノートの対象に含めます。
 - 別の git コマンドに置き換えたり、都度解釈を変えたりしません。
 - 事実として確認できない内容は書かず、必要なら「概要は推定を含む」と明示します。
 - 差分が大きいファイルは、ユーザー影響のある変更を優先して要約します。
+- 新規作成ファイルは中身の diff hunk がない場合でも、パスと責務を確認して「追加されたファイル」として記載し、未追跡のまま放置しないこと。
 
 ### 2. Required Fields
 全体で埋める項目:
@@ -64,10 +68,11 @@ git の比較範囲は毎回手探りにせず、固定コマンドを使いま�
 ### 3. Per-file Writing Rules
 - {$file_name}: リポジトリ相対パスを使います。
 - {$file_description}: そのファイルの責務を 1 文で説明します。
-- {$addition}: 新規追加差分がある場合のみ、中身を要約して記載します。
+- {$addition}: 新規追加差分がある場合のみ、中身を要約して記載します。`??` または `A` の新規ファイルもここに含め、diff hunk がなくてもファイル生成の意図と役割を要約します。
 - {$change}: 既存コードの修正がある場合のみ、中身を要約して記載します。
 - {$deletion}: 削除差分がある場合のみ、中身を要約して記載します。
 - 差分が存在しない種類は、空欄のままにするか、テンプレートに合わせて不要表示を避ける形で処理します。
+- 新規作成ファイルは「追加」で扱い、既存ファイルに存在しない場合でも追加対象として明示すること。
 
 ### 4. Output Location
 - 詳細ページは release-notes/<日時フォルダ>/index.html に配置します。
@@ -91,7 +96,8 @@ git の比較範囲は毎回手探りにせず、固定コマンドを使いま�
 - release-notes/index.html から新しい詳細ページへ遷移できる
 - {$version} と {$release_date} が置換されている
 - 各差分ファイルに {$file_name} と {$file_description} が入っている
-- 追加・変更・削除の要約が、git diff と矛盾していない
+- 新規作成ファイル (`??` または `A`) が見落とされず、追加要約に含まれている
+- 追加・変更・削除の要約が、git diff と git status の結果と矛盾していない
 - HTML 内に未置換のプレースホルダーが残っていない
 
 ## Output

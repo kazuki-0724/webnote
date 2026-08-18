@@ -6,20 +6,21 @@ import { folderRepository } from '../repositories/folderRepository'
 import { notesRepository } from '../repositories/notesRepository'
 
 export const useNotesStore = defineStore('notes', () => {
-  // --- State ---
+  let unsubscribeNotes = null
+  let unsubscribeFolders = null
+
   const folders = ref([])
   const notes = ref([])
 
   const selectedNoteId = ref('n1')
-  const mobileView = ref('sidebar') // 'sidebar' | 'editor'
+  const mobileView = ref('sidebar')
   const isCreatingFolder = ref(false)
   const isEditingContent = ref(false)
-  // 展開中のフォルダIDリスト（全フォルダをデフォルトで展開）
+  
   const expandedFolderIds = ref(['general', 'f1', 'f2'])
   const deleteConfirm = ref({ isOpen: false, type: null, targetId: null })
   const searchQuery = ref('')
 
-  // --- Computed ---
   const selectedNote = computed(
     () => notes.value.find((n) => n.id === selectedNoteId.value) || null
   )
@@ -34,7 +35,6 @@ export const useNotesStore = defineStore('notes', () => {
     )
   })
 
-  // フォルダごとのノート一覧（更新日時降順）
   const notesByFolder = computed(() => {
     const result = {}
     for (const folder of folders.value) {
@@ -45,15 +45,28 @@ export const useNotesStore = defineStore('notes', () => {
     return result
   })
 
-  // --- Actions ---
-  function initNotesStore() {
-    folderRepository.fetchFolderList()
-    .then((f) => (folders.value = f))
-    .catch((err) => console.error('Failed to fetch folders:', err))
+  function stopNotesSync() {
+    if (unsubscribeNotes) {
+      unsubscribeNotes()
+      unsubscribeNotes = null
+    }
 
-    notesRepository.fetchAllNotes()
-    .then((n) => (notes.value = n))
-    .catch((err) => console.error('Failed to fetch notes:', err))
+    if (unsubscribeFolders) {
+      unsubscribeFolders()
+      unsubscribeFolders = null
+    }
+  }
+
+  function initNotesStore() {
+    stopNotesSync()
+
+    unsubscribeFolders = folderRepository.subscribeToFolders((nextFolders) => {
+      folders.value = nextFolders
+    })
+
+    unsubscribeNotes = notesRepository.subscribeToNotes((nextNotes) => {
+      notes.value = nextNotes
+    })
     
     console.log('Notes store initialized')
     console.log('Folders:', folders.value.length, 'Notes:', notes.value.length)
@@ -214,6 +227,7 @@ export const useNotesStore = defineStore('notes', () => {
     searchResults,
     notesByFolder,
     // actions
+    stopNotesSync,
     initNotesStore,
     toggleFolderExpansion,
     isFolderExpanded,
