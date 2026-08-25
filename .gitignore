@@ -1,5 +1,7 @@
 /dist
 /node_modules
+/skills_output
+/playground
 
 .env
 firebase-debug.log
