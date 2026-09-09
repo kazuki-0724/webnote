@@ -111,7 +111,7 @@
 
           <!-- 新規ノートボタン -->
           <button
-            @click.stop="store.createNote(folder.id)"
+            @click.stop="store.openCreateNoteModal(folder.id)"
             title="ノートを作成"
             class="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-all focus:outline-none focus:opacity-100 focus:ring-2 focus:ring-sky-300 shrink-0"
           >

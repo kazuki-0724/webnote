@@ -38,6 +38,14 @@
             {{ formatDate(store.selectedNote.updatedAt) }} 編集
           </div>
 
+          <!-- 種別バッジ -->
+          <div
+            v-if="store.selectedNote.type === 'whiteboard'"
+            class="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-700"
+          >
+            ホワイトボード
+          </div>
+
           <!-- フォルダ移動ドロップダウン -->
           <div class="relative flex items-center">
             <span class="absolute left-2.5 text-sky-500 pointer-events-none w-4 h-4 flex items-center">
@@ -71,7 +79,10 @@
 
       <!-- エディタ本体 -->
       <div class="flex-1 px-4 md:px-8 pt-3 pb-5 select-text overflow-y-auto no-scrollbar flex flex-col z-10 relative">
-        <div class="max-w-6xl mx-auto w-full flex-1 flex flex-col relative">
+        <div
+          class="w-full flex-1 flex flex-col relative"
+          :class="store.selectedNote?.type === 'whiteboard' ? 'max-w-none mx-0' : 'max-w-6xl mx-auto'"
+        >
 
           <!-- タイトル -->
           <div class="mb-2 px-6 md:px-8 py-2 transition-all rounded-xl bg-white focus-within:shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
@@ -83,12 +94,24 @@
               @blur="store.updateNoteTitle(store.selectedNoteId, $event.target.value)"
             />
           </div>
+
+          <div
+            v-if="store.selectedNote.type === 'whiteboard'"
+            class="flex-1 min-h-[480px] overflow-hidden rounded-none border-0 bg-white/70 shadow-none"
+          >
+            <WhiteboardCanvas
+              :note="store.selectedNote"
+              @stroke-end="handleWhiteboardStroke"
+              @clear-canvas="handleClearWhiteboard"
+            />
+          </div>
+
           <!-- コンテンツエリア -->
           <div
+            v-else
             class="flex-1 flex flex-col cursor-text rounded-xl transition-all duration-300 editing-active"
             @click="store.startEditing()"
           >
-            <!-- テキストエリア（編集中） -->
             <textarea
               v-if="store.isEditingContent"
               ref="textareaRef"
@@ -98,14 +121,12 @@
               @blur="store.updateNoteContent(store.selectedNoteId, $event.target.value)"
             ></textarea>
 
-            <!-- 表示モード -->
             <div
               v-else
               class="w-full flex-1 text-[1.05rem] md:text-[1.1rem] leading-[1.8] text-slate-700 px-6 py-4 md:px-8 md:py-5 whitespace-pre-wrap break-words"
               v-html="linkify(store.selectedNote.content)"
             ></div>
           </div>
-
         </div>
       </div>
     </template>
@@ -116,6 +137,7 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import { useNotesStore } from '../store/notes'
 import { formatDate, linkify, extractUrls } from '../utils/noteUtil'
+import WhiteboardCanvas from './WhiteboardCanvas.vue'
 import NoteIcon from '../assets/icons/note-icon.svg'
 import ArrowLeftIcon from '../assets/icons/arrow-left-solid-full.svg'
 import ChevronDownIcon from '../assets/icons/chevron-down-solid-full.svg'
@@ -130,6 +152,16 @@ const linkChips = computed(() => {
   const content = store.selectedNote?.content || ''
   return [...new Set(extractUrls(content))]
 })
+
+function handleWhiteboardStroke(stroke) {
+  if (!store.selectedNoteId || !stroke) return
+  store.saveWhiteboardStroke(store.selectedNoteId, stroke)
+}
+
+function handleClearWhiteboard() {
+  if (!store.selectedNoteId) return
+  store.clearWhiteboard(store.selectedNoteId)
+}
 
 watch(
   () => store.isEditingContent,

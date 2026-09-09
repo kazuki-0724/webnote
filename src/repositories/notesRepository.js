@@ -3,16 +3,21 @@ import { db } from '../firebase'
 import { FIRESTORE_COLLECTIONS } from '../constrants/firestore'
 
 export const notesRepository = {
-  async fetchAllNotes() {
-    const querySnapshot = await getDocs(collection(db, FIRESTORE_COLLECTIONS.NOTES))
+  async fetchAllNotes(uid) {
+    if (!uid) return Promise.resolve([])
+    const querySnapshot = await getDocs(collection(db, 'users', uid, `notes`))
     return querySnapshot.docs.map((snapshot) => ({
       ...snapshot.data(),
       id: snapshot.id,
     }))
   },
 
-  subscribeToNotes(callback) {
-    const notesCollection = collection(db, FIRESTORE_COLLECTIONS.NOTES)
+  subscribeToNotes(uid, callback) {
+    if (!uid) {
+      callback([])
+      return () => {}
+    }
+    const notesCollection = collection(db, 'users', uid, `notes`)
 
     const unsubscribe = onSnapshot(
       notesCollection,
@@ -31,29 +36,37 @@ export const notesRepository = {
     return unsubscribe
   },
 
-  async createNote(note) {
+  async createNote(uid, note) {
+    if (!uid) return Promise.resolve([])
     const { id, ...data } = note
-    await setDoc(doc(db, FIRESTORE_COLLECTIONS.NOTES, id), data)
+    await setDoc(doc(db, 'users', uid, `notes`, id), data)
   },
 
-  async updateNote(id, patch) {
-    await updateDoc(doc(db, FIRESTORE_COLLECTIONS.NOTES, id), patch)
+  async updateNote(uid, id, patch) {
+    if (!uid) return Promise.resolve([])
+    await updateDoc(doc(db, 'users', uid, `notes`, id), patch)
   },
 
-  async deleteNote(id) {
-    await deleteDoc(doc(db, FIRESTORE_COLLECTIONS.NOTES, id))
+  async deleteNote(uid, id) {
+    if (!uid) return Promise.resolve([])
+    await deleteDoc(doc(db, 'users', uid, `notes`, id))
   },
   
-  async deleteAllNotesInFolder(folderId) {
-    const querySnapshot = await getDocs(collection(db, FIRESTORE_COLLECTIONS.NOTES))
+  async deleteAllNotesInFolder(uid, folderId) {
+    if (!uid) return Promise.resolve([])
+    const querySnapshot = await getDocs(collection(db, 'users', uid, `notes`))
     const batch = querySnapshot.docs
       .filter((snapshot) => snapshot.data().folderId === folderId)
-      .map((snapshot) => deleteDoc(doc(db, FIRESTORE_COLLECTIONS.NOTES, snapshot.id)))
+      .map((snapshot) => deleteDoc(doc(db, 'users', uid, `notes`, snapshot.id)))
     await Promise.all(batch)
   },
 
-  subscribeToNote(id, callback) {
-    const docRef = doc(db, FIRESTORE_COLLECTIONS.NOTES, id)
+  subscribeToNote(uid, id, callback) {
+    if (!uid) {
+      callback([])
+      return () => {}
+    }
+    const docRef = doc(db, 'users', uid, `notes`, id)
     const unsubscribe = onSnapshot(docRef, (snapshot) => {
       if (!snapshot.exists()) {
         callback(null)

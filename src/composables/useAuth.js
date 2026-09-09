@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth, signInWithGoogle, logOut } from '../firebase'
 import { validateAuthCookie, setAuthCookie, clearAuthCookie } from '../utils/authCookie'
@@ -7,6 +7,7 @@ const user = ref(null)
 const isLoading = ref(false)
 const error = ref(null)
 const authReady = ref(false)
+const currentUid = computed(() => user.value?.uid ?? null)
 
 function syncAuthSession(currentUser) {
   const hasCookie = validateAuthCookie()
@@ -89,6 +90,7 @@ export function useAuth() {
     isLoading,
     error,
     authReady,
+    currentUid,
     initializeAuth,
     loginWithGoogle,
     logoutWithGoogle,

@@ -18,18 +18,44 @@
     @login="handleLogin"
   />
 
-  <div v-else class="relative bg-slate-50 bg-mesh text-slate-800 overflow-hidden select-none h-screen w-screen flex antialiased" style="font-family: 'Inter', sans-serif;">
-    <div v-if="showUserBadge" class="hidden md:flex absolute right-4 top-4 z-10 items-center gap-3">
-      <span class="text-sm text-slate-600">{{ user.displayName || 'Google User' }}</span>
-      <button
-        class="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100"
-        @click="logout"
-      >
-        ログアウト
-      </button>
-    </div>
-    <SidebarPane />
-    <EditorPane />
+  <div v-else class="relative bg-slate-50 bg-mesh text-slate-800 overflow-hidden select-none h-screen w-screen antialiased" style="font-family: 'Inter', sans-serif;">
+    <template v-if="isWhiteboardFullscreen">
+      <div class="relative h-full w-full">
+        <div v-if="showUserBadge" class="hidden md:flex absolute right-4 top-4 z-20 items-center gap-3">
+          <span class="text-sm text-slate-600">{{ user.displayName || 'Google User' }}</span>
+          <button
+            class="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100"
+            @click="logout"
+          >
+            ログアウト
+          </button>
+        </div>
+        <WhiteboardCanvas
+          :note="store.selectedNote"
+          @stroke-end="handleWhiteboardStroke"
+          @clear-canvas="handleClearWhiteboard"
+          @back-to-top="handleBackToTop"
+        />
+      </div>
+    </template>
+
+    <template v-else>
+      <div class="relative h-full w-full flex">
+        <div v-if="showUserBadge" class="hidden md:flex absolute right-4 top-4 z-10 items-center gap-3">
+          <span class="text-sm text-slate-600">{{ user.displayName || 'Google User' }}</span>
+          <button
+            class="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100"
+            @click="logout"
+          >
+            ログアウト
+          </button>
+        </div>
+        <SidebarPane />
+        <EditorPane />
+      </div>
+    </template>
+
+    <ModalCreateNote />
     <ModalConfirm />
   </div>
 </template>
@@ -40,6 +66,8 @@ import { useNotesStore } from './store/notes'
 import { useAuth } from './composables/useAuth'
 import SidebarPane from './components/SidebarPane.vue'
 import EditorPane from './components/EditorPane.vue'
+import WhiteboardCanvas from './components/WhiteboardCanvas.vue'
+import ModalCreateNote from './components/ModalCreateNote.vue'
 import ModalConfirm from './components/ModalConfirm.vue'
 import Login from './components/Login.vue'
 import Favicon from './assets/icons/favicon.svg'
@@ -54,15 +82,35 @@ const showUserBadge = computed(() => {
   return store.mobileView === 'sidebar'
 })
 
+const isWhiteboardFullscreen = computed(() => {
+  return !!store.selectedNote && store.selectedNote.type === 'whiteboard'
+})
+
 function updateViewportState() {
   isMobile.value = window.innerWidth < 768
+}
+
+function handleWhiteboardStroke(stroke) {
+  if (!store.selectedNoteId || !stroke) return
+  store.saveWhiteboardStroke(store.selectedNoteId, stroke)
+}
+
+function handleClearWhiteboard() {
+  if (!store.selectedNoteId) return
+  store.clearWhiteboard(store.selectedNoteId)
+}
+
+function handleBackToTop() {
+  store.selectedNoteId = null
+  store.mobileView = 'sidebar'
+  store.isEditingContent = false
 }
 
 async function handleLogin() {
   const currentUser = await loginWithGoogle()
 
   if (currentUser) {
-    store.initNotesStore()
+    store.initNotesStore(currentUser?.uid)
   }
 }
 
@@ -78,7 +126,7 @@ onMounted(async () => {
   await initializeAuth()
 
   if (user.value) {
-    store.initNotesStore()
+    store.initNotesStore(user.value?.uid)
   } else {
     store.stopNotesSync()
   }

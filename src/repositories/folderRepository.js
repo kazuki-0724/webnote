@@ -1,19 +1,23 @@
 import { collection, getDocs, doc, setDoc, deleteDoc, onSnapshot } from 'firebase/firestore'
 import { db } from '../firebase'
 import { notesRepository } from '../repositories/notesRepository'
-import { FIRESTORE_COLLECTIONS } from '../constrants/firestore'
 
 export const folderRepository = {
-  async fetchFolderList() {
-    const querySnapshot = await getDocs(collection(db, FIRESTORE_COLLECTIONS.FOLDERS))
+  async fetchFolderList(uid) {
+    if (!uid) return Promise.resolve([])
+    const querySnapshot = await getDocs(collection(db, 'users', uid, `folders`))
     return querySnapshot.docs.map((snapshot) => ({
       ...snapshot.data(),
       id: snapshot.id,
     }))
   },
 
-  subscribeToFolders(callback) {
-    const foldersCollection = collection(db, FIRESTORE_COLLECTIONS.FOLDERS)
+  subscribeToFolders(uid, callback) {
+    if (!uid) {
+      callback([])
+      return () => {}
+    }
+    const foldersCollection = collection(db, 'users', uid, `folders`)
 
     const unsubscribe = onSnapshot(
       foldersCollection,
@@ -32,14 +36,16 @@ export const folderRepository = {
     return unsubscribe
   },
 
-  async createFolder(folder) {
+  async createFolder(uid, folder) {
+    if (!uid) return Promise.resolve([])
     const { id, ...data } = folder
-    await setDoc(doc(db, FIRESTORE_COLLECTIONS.FOLDERS, id), data)
+    await setDoc(doc(db, 'users', uid, `folders`, id), data)
   },
 
-  async deleteFolder(id) {
-    await notesRepository.deleteAllNotesInFolder(id)
-    await deleteDoc(doc(db, FIRESTORE_COLLECTIONS.FOLDERS, id))
+  async deleteFolder(uid, id) {
+    if (!uid) return Promise.resolve([])
+    await notesRepository.deleteAllNotesInFolder(uid, id)
+    await deleteDoc(doc(db, 'users', uid, `folders`, id))
   },
 }
 
