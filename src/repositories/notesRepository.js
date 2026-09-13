@@ -39,7 +39,7 @@ export const notesRepository = {
   async createNote(uid, note) {
     if (!uid) return Promise.resolve([])
     const { id, ...data } = note
-    await setDoc(doc(db, 'users', uid, `notes`, id), data)
+    await setDoc(doc(db, 'users', uid, `notes`, id), { ...data })
   },
 
   async updateNote(uid, id, patch) {

@@ -1,7 +1,6 @@
 import { ref, computed } from 'vue'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth, signInWithGoogle, logOut } from '../firebase'
-import { validateAuthCookie, setAuthCookie, clearAuthCookie } from '../utils/authCookie'
 
 const user = ref(null)
 const isLoading = ref(false)
@@ -10,37 +9,27 @@ const authReady = ref(false)
 const currentUid = computed(() => user.value?.uid ?? null)
 
 function syncAuthSession(currentUser) {
-  const hasCookie = validateAuthCookie()
-
-  if (currentUser && hasCookie) {
+  if (currentUser) {
     user.value = currentUser
     return
   }
-
-  clearAuthCookie()
   user.value = null
 }
 
 async function initializeAuth() {
-  const hasCookie = validateAuthCookie()
 
-  if (!hasCookie) {
-    clearAuthCookie()
-    authReady.value = true
-    user.value = null
-
-    onAuthStateChanged(auth, (currentUser) => {
-      syncAuthSession(currentUser)
-    })
-    return
-  }
+  authReady.value = false
 
   await auth.authStateReady()
+
+  const currentUser = auth.currentUser
+  syncAuthSession(currentUser)
   authReady.value = true
 
   onAuthStateChanged(auth, (currentUser) => {
     syncAuthSession(currentUser)
   })
+
 }
 
 async function loginWithGoogle() {
@@ -51,16 +40,12 @@ async function loginWithGoogle() {
     const currentUser = await signInWithGoogle()
 
     if (currentUser) {
-      setAuthCookie()
       user.value = currentUser
       return currentUser
     }
-
-    clearAuthCookie()
     return null
   } catch (err) {
     error.value = err
-    clearAuthCookie()
     console.error('Google login failed:', err)
     return null
   } finally {
@@ -74,7 +59,6 @@ async function logoutWithGoogle() {
 
   try {
     await logOut()
-    clearAuthCookie()
     user.value = null
   } catch (err) {
     error.value = err

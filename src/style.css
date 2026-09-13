@@ -42,3 +42,161 @@ textarea:focus, input:focus { outline: none; }
 body {
   font-family: 'Inter', sans-serif;
 }
+
+.loading-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(12px);
+  border-radius: 2rem;
+  padding: 2.2rem 2rem 1.8rem;
+}
+
+.signature-wrap {
+  width: min(72vw, 700px);
+  min-width: 280px;
+}
+
+.signature-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 14px 18px rgba(15, 23, 42, 0.08));
+}
+
+.signature-underline {
+  fill: none;
+  stroke: rgba(148, 163, 184, 0.8);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 500;
+  stroke-dashoffset: 500;
+  animation: underlineDraw 1.4s ease-out 0.8s forwards;
+}
+
+.signature-text {
+  fill: rgba(15, 23, 42, 0.08);
+  stroke: url(#signatureGradient);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 1200;
+  font-family: 'Segoe Print', 'Bradley Hand', 'Comic Sans MS', cursive;
+  font-size: 84px;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: 1.5px;
+  animation: signatureDraw 2.2s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+    signatureFill 0.9s ease 1.5s forwards;
+}
+
+.signature-pen {
+  transform-origin: center;
+  animation: penSweep 2.2s ease-in-out infinite alternate;
+}
+
+.signature-pen path,
+.signature-pen circle {
+  fill: rgba(15, 23, 42, 0.88);
+  stroke: rgba(15, 23, 42, 0.18);
+  stroke-width: 1;
+}
+
+.loader-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: #475569;
+}
+
+.loader-pulse {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #7dd3fc, #0ea5e9);
+  box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.25);
+  animation: pulse 1.3s ease-in-out infinite;
+}
+
+.loading-message {
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+@keyframes signatureDraw {
+  0% {
+    stroke-dashoffset: 1200;
+    fill: rgba(15, 23, 42, 0.08);
+  }
+  100% {
+    stroke-dashoffset: 0;
+    fill: rgba(15, 23, 42, 0.12);
+  }
+}
+
+@keyframes signatureFill {
+  0% {
+    fill: rgba(15, 23, 42, 0.12);
+  }
+  100% {
+    fill: rgba(15, 23, 42, 0.82);
+  }
+}
+
+@keyframes underlineDraw {
+  from {
+    stroke-dashoffset: 500;
+    opacity: 0;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.28);
+    transform: scale(0.95);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(14, 165, 233, 0);
+    transform: scale(1);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(14, 165, 233, 0);
+    transform: scale(0.95);
+  }
+}
+
+@keyframes penSweep {
+  0% {
+    transform: translate(-18px, 8px) rotate(-10deg);
+  }
+  100% {
+    transform: translate(14px, -10px) rotate(10deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .loading-card {
+    gap: 1rem;
+    padding: 1.6rem 1.2rem 1.4rem;
+    border-radius: 1.4rem;
+  }
+
+  .signature-text {
+    font-size: 58px;
+    letter-spacing: 0.8px;
+  }
+
+  .loading-message {
+    font-size: 0.75rem;
+  }
+}

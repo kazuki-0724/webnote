@@ -52,6 +52,15 @@
                   </button>
                 </div>
               </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-[0.12em] mb-2">タイトル</label>
+                <input
+                  type="text"
+                  v-model="noteTitle"
+                  class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:border-sky-300 focus:ring-1 focus:ring-sky-300"
+                  :placeholder="selectedType === 'note' ? '新しいノート' : '新しいホワイトボード'"
+                />
+              </div>
             </div>
           </div>
           <div class="px-7 py-5 bg-slate-50/50 flex justify-end gap-3 border-t border-slate-100/50">
@@ -82,6 +91,7 @@ const store = useNotesStore()
 
 const selectedFolderId = ref('general')
 const selectedType = ref('note')
+const noteTitle = ref('')
 
 watch(
   () => store.isCreateNoteModalOpen,
@@ -95,7 +105,7 @@ watch(
 )
 
 function handleCreate() {
-  store.createNote(selectedFolderId.value, selectedType.value)
+  store.createNote(selectedFolderId.value, selectedType.value, noteTitle.value)
   store.closeCreateNoteModal()
 }
 </script>

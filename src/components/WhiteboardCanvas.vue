@@ -13,6 +13,13 @@
         </svg>
       </button>
 
+      <input
+        type="text"
+        :value="props.note?.title"
+        @input="emit('title-change', $event.target.value, props.note?.id)"
+        class="bg-transparent text-slate-700 text-sm font-medium focus:outline-none"
+      />
+
       <button
         v-for="tool in toolOptions"
         :key="tool.value"
@@ -50,9 +57,12 @@
           @click="selectedWidth = size"
           class="inline-flex h-6 w-6 items-center justify-center rounded-full border text-[10px] font-bold transition-colors"
           :class="selectedWidth === size ? 'border-sky-300 bg-sky-50 text-sky-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
-        >
-          {{ size }}
-        </button>
+          :style="{
+            width: `${size + 7}px`,
+            height: `${size + 7}px`,
+            backgroundColor: selectedWidth === size ? '#f0f9ff' : '#ffffff'
+          }"
+        />
       </div>
 
       <div class="mx-1 h-6 w-px bg-slate-200" />
@@ -174,7 +184,7 @@ const viewportHeight = ref(1200)
 const selectedTool = ref('pen')
 const selectedWidth = ref(3)
 const selectedColor = ref('#111827')
-const drawMode = ref('handwriting')
+const drawMode = ref('pen')
 const panOffset = ref({ x: 0, y: 0 })
 const activePointers = new Map()
 const panState = ref(null)
@@ -192,8 +202,8 @@ const modeOptions = [
 
 const sizeOptions = {
   pen: [2, 3, 5, 7, 10],
-  marker: [3, 6, 10],
-  eraser: [8, 16, 30],
+  marker: [8, 16, 24],
+  eraser: [8, 16, 24],
 }
 
 const paletteOptions = {
@@ -251,11 +261,11 @@ watch(
   selectedTool,
   (tool) => {
     if (tool === 'pen') {
-      selectedWidth.value = 3
+      selectedWidth.value = 5
       selectedColor.value = '#111827'
     }
     if (tool === 'marker') {
-      selectedWidth.value = 6
+      selectedWidth.value = 16
       selectedColor.value = '#facc15'
     }
     if (tool === 'eraser') {

@@ -5,9 +5,13 @@ import { db } from '../firebase'
 import { folderRepository } from '../repositories/folderRepository'
 import { notesRepository } from '../repositories/notesRepository'
 
+const PENDING_SYNC_STORAGE_PREFIX = 'webnote_pending_sync:'
+
 export const useNotesStore = defineStore('notes', () => {
   let unsubscribeNotes = null
   let unsubscribeFolders = null
+  let flushTimer = null
+  const pendingNoteUpdates = new Map()
 
   const folders = ref([])
   const notes = ref([])
@@ -60,6 +64,42 @@ export const useNotesStore = defineStore('notes', () => {
     return result
   })
 
+  function persistPendingSaves() {
+    if (!currentUserId.value) return
+
+    try {
+      const payload = Object.fromEntries(pendingNoteUpdates)
+      if (Object.keys(payload).length === 0) {
+        localStorage.removeItem(`${PENDING_SYNC_STORAGE_PREFIX}${currentUserId.value}`)
+        return
+      }
+
+      localStorage.setItem(`${PENDING_SYNC_STORAGE_PREFIX}${currentUserId.value}`, JSON.stringify(payload))
+    } catch (error) {
+      console.error('Failed to save pending updates to localStorage:', error)
+    }
+  }
+
+  function restorePendingSaves() {
+    if (!currentUserId.value) return
+
+    try {
+      const raw = localStorage.getItem(`${PENDING_SYNC_STORAGE_PREFIX}${currentUserId.value}`)
+      if (!raw) return
+
+      const payload = JSON.parse(raw)
+      if (!payload || typeof payload !== 'object') return
+
+      for (const [noteId, patch] of Object.entries(payload)) {
+        if (patch && typeof patch === 'object') {
+          pendingNoteUpdates.set(noteId, patch)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to restore pending updates from localStorage:', error)
+    }
+  }
+
   function stopNotesSync() {
     if (unsubscribeNotes) {
       unsubscribeNotes()
@@ -69,6 +109,56 @@ export const useNotesStore = defineStore('notes', () => {
     if (unsubscribeFolders) {
       unsubscribeFolders()
       unsubscribeFolders = null
+    }
+
+    if (flushTimer) {
+      clearTimeout(flushTimer)
+      flushTimer = null
+    }
+
+    pendingNoteUpdates.clear()
+  }
+
+  function queueNoteUpdate(noteId, patch) {
+    if (!noteId || !patch || !currentUserId.value) return
+
+    const nextPatch = pendingNoteUpdates.get(noteId) || {}
+    pendingNoteUpdates.set(noteId, { ...nextPatch, ...patch })
+    persistPendingSaves()
+
+    if (flushTimer) return
+
+    flushTimer = setTimeout(() => {
+      flushTimer = null
+      flushPendingSaves()
+    }, 3000)
+  }
+
+  async function flushPendingSaves() {
+    if (!currentUserId.value) return
+
+    if (pendingNoteUpdates.size === 0) {
+      restorePendingSaves()
+    }
+
+    if (pendingNoteUpdates.size === 0) return
+
+    const queuedEntries = [...pendingNoteUpdates.entries()]
+    pendingNoteUpdates.clear()
+    persistPendingSaves()
+
+    for (const [noteId, patch] of queuedEntries) {
+      try {
+        await notesRepository.updateNote(currentUserId.value, noteId, patch)
+      } catch (error) {
+        console.error('Failed to flush pending note save:', error)
+        pendingNoteUpdates.set(noteId, patch)
+        persistPendingSaves()
+      }
+    }
+
+    if (pendingNoteUpdates.size === 0) {
+      localStorage.removeItem(`${PENDING_SYNC_STORAGE_PREFIX}${currentUserId.value}`)
     }
   }
 
@@ -82,6 +172,7 @@ export const useNotesStore = defineStore('notes', () => {
     }
 
     currentUserId.value = uid
+    restorePendingSaves()
 
     unsubscribeFolders = folderRepository.subscribeToFolders(uid, (nextFolders) => {
       folders.value = nextFolders
@@ -109,6 +200,8 @@ export const useNotesStore = defineStore('notes', () => {
   }
 
   function selectNote(id) {
+    flushPendingSaves()
+
     const note = getNoteById(id)
     selectedNoteId.value = id
     if (note) {
@@ -180,10 +273,15 @@ export const useNotesStore = defineStore('notes', () => {
       .catch((err) => console.error('Failed to delete folder:', err))
   }
 
-  function createNote(folderId, type = 'note') {
+  function createNote(folderId, type = 'note', title) {
+
+    const resolvedTitle =  title?.trim() || (type === 'note' ? '新しいノート' : '新しいホワイトボード')
+
+    title = resolvedTitle
+
     const note = {
       id: `n${Date.now()}`,
-      title: '',
+      title: resolvedTitle,
       content: '',
       type,
       folderId,
@@ -280,12 +378,11 @@ export const useNotesStore = defineStore('notes', () => {
     note.whiteboard = whiteboard
     note.updatedAt = Date.now()
 
-    return notesRepository.updateNote(currentUserId.value, noteId, {
+    queueNoteUpdate(noteId, {
       type: 'whiteboard',
       whiteboard,
       updatedAt: note.updatedAt,
     })
-      .catch((err) => console.error('Failed to erase whiteboard stroke:', err))
   }
 
   function saveWhiteboardStroke(noteId, stroke) {
@@ -310,12 +407,11 @@ export const useNotesStore = defineStore('notes', () => {
     note.whiteboard = whiteboard
     note.updatedAt = Date.now()
 
-    return notesRepository.updateNote(currentUserId.value, noteId, {
+    queueNoteUpdate(noteId, {
       type: 'whiteboard',
       whiteboard,
       updatedAt: note.updatedAt,
     })
-      .catch((err) => console.error('Failed to save whiteboard stroke:', err))
   }
 
   function clearWhiteboard(noteId) {
@@ -335,33 +431,38 @@ export const useNotesStore = defineStore('notes', () => {
     note.whiteboard = whiteboard
     note.updatedAt = Date.now()
 
-    return notesRepository.updateNote(currentUserId.value, noteId, {
+    queueNoteUpdate(noteId, {
       whiteboard,
       updatedAt: note.updatedAt,
     })
-      .catch((err) => console.error('Failed to clear whiteboard:', err))
   }
 
   function updateNoteTitle(noteId, newTitle) {
     const note = getNoteById(noteId)
-    if (note) {
-      notesRepository.updateNote(currentUserId.value, noteId, {
-        title: newTitle,
-        updatedAt: Date.now(),
-      })
-      .catch((err) => console.error('Failed to update note:', err))
-    }
+    if (!note) return
+
+    const nextTitle = String(newTitle ?? '')
+    note.title = nextTitle
+    note.updatedAt = Date.now()
+
+    queueNoteUpdate(noteId, {
+      title: nextTitle,
+      updatedAt: note.updatedAt,
+    })
   }
 
   function updateNoteContent(noteId, newContent) {
     const note = getNoteById(noteId)
-    if (note) {
-      notesRepository.updateNote(currentUserId.value, noteId, {
-        content: newContent,
-        updatedAt: Date.now(),
-      })
-      .catch((err) => console.error('Failed to update note:', err))
-    }
+    if (!note) return
+
+    const nextContent = newContent ?? ''
+    note.content = nextContent
+    note.updatedAt = Date.now()
+
+    queueNoteUpdate(noteId, {
+      content: nextContent,
+      updatedAt: note.updatedAt,
+    })
   }
 
   function deleteNote(noteId) {
@@ -412,6 +513,7 @@ export const useNotesStore = defineStore('notes', () => {
     closeCreateNoteModal,
     setMobileView,
     moveNote,
+    flushPendingSaves,
     startEditing,
     stopEditing,
     openDeleteConfirm,

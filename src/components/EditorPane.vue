@@ -91,6 +91,7 @@
               class="w-full text-2xl md:text-3xl font-bold border-none outline-none bg-transparent text-slate-800 placeholder-slate-300 focus:ring-0 p-0 tracking-tight leading-tight"
               placeholder="タイトル..."
               :value="store.selectedNote.title"
+              @input="store.updateNoteTitle(store.selectedNoteId, $event.target.value)"
               @blur="store.updateNoteTitle(store.selectedNoteId, $event.target.value)"
             />
           </div>
@@ -118,6 +119,7 @@
               class="w-full flex-1 min-h-[300px] border-none outline-none resize-none bg-transparent focus:ring-0 text-[1.05rem] md:text-[1.1rem] leading-[1.8] text-slate-700 px-6 py-4 md:px-8 md:py-5"
               placeholder="ここにアイデアを書き留めましょう..."
               :value="store.selectedNote.content"
+              @input="store.updateNoteContent(store.selectedNoteId, $event.target.value)"
               @blur="store.updateNoteContent(store.selectedNoteId, $event.target.value)"
             ></textarea>
 
