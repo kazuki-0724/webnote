@@ -18,7 +18,7 @@
     </div>
 
     <!-- ノート編集エリア -->
-    <template v-if="store.selectedNote">
+    <template v-if="store.selectedNote && store.selectedNote.type !== 'whiteboard'">
       <!-- ヘッダー -->
       <div class="h-14 flex items-center justify-between px-6 shrink-0 z-10 transition-all duration-200">
         <div class="flex items-center gap-2 md:gap-3">
@@ -36,14 +36,6 @@
           >
             <span class="w-1.5 h-1.5 rounded-full bg-sky-400 mr-2"></span>
             {{ formatDate(store.selectedNote.updatedAt) }} 編集
-          </div>
-
-          <!-- 種別バッジ -->
-          <div
-            v-if="store.selectedNote.type === 'whiteboard'"
-            class="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-700"
-          >
-            ホワイトボード
           </div>
 
           <!-- フォルダ移動ドロップダウン -->
@@ -80,8 +72,7 @@
       <!-- エディタ本体 -->
       <div class="flex-1 px-4 md:px-8 pt-3 pb-5 select-text overflow-y-auto no-scrollbar flex flex-col z-10 relative">
         <div
-          class="w-full flex-1 flex flex-col relative"
-          :class="store.selectedNote?.type === 'whiteboard' ? 'max-w-none mx-0' : 'max-w-6xl mx-auto'"
+          class="w-full flex-1 flex flex-col relative max-w-6xl mx-auto"
         >
 
           <!-- タイトル -->
@@ -96,20 +87,8 @@
             />
           </div>
 
-          <div
-            v-if="store.selectedNote.type === 'whiteboard'"
-            class="flex-1 min-h-[480px] overflow-hidden rounded-none border-0 bg-white/70 shadow-none"
-          >
-            <WhiteboardCanvas
-              :note="store.selectedNote"
-              @stroke-end="handleWhiteboardStroke"
-              @clear-canvas="handleClearWhiteboard"
-            />
-          </div>
-
           <!-- コンテンツエリア -->
           <div
-            v-else
             class="flex-1 flex flex-col cursor-text rounded-xl transition-all duration-300 editing-active"
             @click="store.startEditing()"
           >
@@ -139,7 +118,6 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import { useNotesStore } from '../store/notes'
 import { formatDate, linkify, extractUrls } from '../utils/noteUtil'
-import WhiteboardCanvas from './WhiteboardCanvas.vue'
 import NoteIcon from '../assets/icons/note-icon.svg'
 import ArrowLeftIcon from '../assets/icons/arrow-left-solid-full.svg'
 import ChevronDownIcon from '../assets/icons/chevron-down-solid-full.svg'
@@ -154,16 +132,6 @@ const linkChips = computed(() => {
   const content = store.selectedNote?.content || ''
   return [...new Set(extractUrls(content))]
 })
-
-function handleWhiteboardStroke(stroke) {
-  if (!store.selectedNoteId || !stroke) return
-  store.saveWhiteboardStroke(store.selectedNoteId, stroke)
-}
-
-function handleClearWhiteboard() {
-  if (!store.selectedNoteId) return
-  store.clearWhiteboard(store.selectedNoteId)
-}
 
 watch(
   () => store.isEditingContent,

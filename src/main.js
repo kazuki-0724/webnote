@@ -3,9 +3,11 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import './style.css'
 import { registerWebMCPTools } from './webMCP'
+import router from './router' 
 
 const app = createApp(App)
 app.use(createPinia())
+app.use(router)
 app.mount('#app')
 
 registerWebMCPTools()

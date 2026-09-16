@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>リリースノート</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            color: #1f2937;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+    <div class="max-w-3xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+        <header class="mb-12 text-center">
+            <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
+                リリースノート
+            </h1>
+            <p class="mt-4 text-lg text-gray-500">
+                WebNote バージョン <span class="font-bold text-blue-600">0.0.6</span> の更新内容
+            </p>
+            <p class="mt-2 text-sm text-gray-400">
+                リリース日: 2026-09-16 00:00:00
+            </p>
+        </header>
+
+        <main class="space-y-8">
+            <section class="bg-blue-50 p-6 rounded-2xl border border-blue-100 mb-8">
+                <h2 class="text-xl font-bold text-blue-900 mb-3">リリース概要</h2>
+                <p class="text-blue-800 text-sm leading-relaxed">
+                    このリリースでは、Vue Router ベースの画面遷移を導入し、認証ゲート・ログイン画面・ホーム画面・ホワイトボード画面を分離して、ログイン後の初期化と遷移を整理しました。
+                    併せて、認証確認中のローディング表示と画面ごとの保存制御を追加し、ホームとホワイトボードの切り替えがより自然になるよう改善しています。
+                    これにより、シングルページのままでも画面責務と認証状態が明確に分離され、操作の見通しが向上しています。
+                </p>
+            </section>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        package.json
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-1">アプリの依存関係と起動スクリプトを定義するプロジェクト設定です。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span>
+                        <p class="text-gray-700 text-sm">Vue Router を依存関係として追加し、画面遷移制御に対応できる基盤を整えました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">ルーティングを前提としたアプリ構成に合わせて、依存関係の整理を行いました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        src/App.vue
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-1">アプリ全体のルート表示と初期認証処理を担う最上位コンポーネントです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">従来の内蔵画面切り替えを廃止し、ルートに router-view を置く構造へ変更しました。初期化時に initializeAuth を呼び出し、認証状態の確認を一元化しています。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">画面ごとの分岐ロジックと直接的なローディング/ログイン UI を削除しました。</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        src/main.js
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-1">Vue App の起動とプラグイン登録を行うエントリポイントです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span>
+                        <p class="text-gray-700 text-sm">Vue Router をアプリへ登録し、画面遷移を有効化しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">WebMCP の登録は維持しつつ、起動時に router を使う構成へ統一しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        src/router/index.js
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-1">認証状態に応じた画面遷移とルート定義を管理するルーターです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span>
+                        <p class="text-gray-700 text-sm">/auth、/login、/home、/whiteboard を定義し、認証済みユーザーと未認証ユーザーの導線を分けました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">beforeEach によるリダイレクト判定を追加し、初期ロード時にホームやログインのどちらへ進むべきかを明示しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        src/components/AuthGate.vue
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-1">認証状態が確定するまでの待機画面と遷移判定を担当するゲートです。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span>
+                        <p class="text-gray-700 text-sm">auth ルートを作成し、authReady と user の両方が揃った時点で /home または /login に振り分ける判定を追加しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        src/components/Home.vue
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-1">認証済みユーザー向けのメイン画面で、サイドバーとエディタの基準視点を保持します。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span>
+                        <p class="text-gray-700 text-sm">ホーム画面を追加し、selectedNote が whiteboard の場合に /whiteboard へ遷移するルールを実装しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">ページ戻る操作やブラウザ履歴の制御を追加し、ホーム画面から離脱した際にログイン後の流れが壊れないよう整理しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        src/components/Login.vue
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-1">Google ログイン画面とログイン成功時の遷移を担う認証 UI です。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">ログイン成功後の遷移先を router.replace('/home') に統一し、ユーザーが認証済みになるとメイン画面へ自然に戻るようにしました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        src/components/Loading.vue
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-1">認証状態確認中に表示するローディング UI です。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span>
+                        <p class="text-gray-700 text-sm">WebNote の署名ロゴとローディングアニメーション付きの待機ビューを追加し、認証確認中の見た目を整えました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        src/components/WhiteboardPage.vue
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-1">ホワイトボード専用画面で描画内容の保存と戻る動作を管理します。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800 w-16 text-center mr-3 shrink-0">追加</span>
+                        <p class="text-gray-700 text-sm">/whiteboard 画面を追加し、選択中ノートの種別が whiteboard である場合の表示と遷移を実装しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">Back-to-top やタイトル変更のイベントを store 経由で処理するように整理し、ホワイトボード画面からメイン画面へ戻る流れを制御しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-xl font-mono font-bold text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        src/webMCP.js
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-1">ブラウザ上で利用するモデル連携ツール群の定義です。</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 w-16 text-center mr-3 shrink-0">変更</span>
+                        <p class="text-gray-700 text-sm">WebMCP ツールの定義を維持しつつ、アプリのバージョン取得を含むツール群の利用方法を整理しました。</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 w-16 text-center mr-3 shrink-0">削除</span>
+                        <p class="text-gray-700 text-sm">なし</p>
+                    </div>
+                </div>
+            </article>
+        </main>
+
+        <footer class="mt-16 text-center border-t border-gray-200 pt-8">
+            <p class="text-sm text-gray-500">
+                &copy; 2026 hogehoge Inc. All rights reserved.
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

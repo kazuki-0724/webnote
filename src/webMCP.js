@@ -2,14 +2,14 @@ import { useNotesStore } from './store/notes'
 
 const tools = [
     {
-        name: "app_version_checker",
+        name: "app_version",
         description: "アプリのバージョンを取得するツールです。エージェントはこのツールを使って、ユーザーにアプリのバージョンを報告できます。",
         parameters: {},
         execute: async (args) => {
             try {
                 return {
                     status: "success",
-                    message: `アプリのバージョンは 0.0.2 です。`,
+                    message: `アプリのバージョンは 0.0.5 です。`,
                 };
             } catch (error) {
                 // エラーをエージェントに伝達し、ユーザーに報告させる

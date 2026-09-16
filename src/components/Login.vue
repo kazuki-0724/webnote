@@ -6,7 +6,7 @@
       <button
         class="rounded-full bg-slate-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
         :disabled="isLoading"
-        @click="$emit('login')"
+        @click="handleLogin"
       >
         {{ isLoading ? 'ログイン中...' : 'Googleでログイン' }}
       </button>
@@ -15,12 +15,28 @@
 </template>
 
 <script setup>
-defineProps({
-  isLoading: {
-    type: Boolean,
-    default: false,
-  },
-})
+import { watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuth } from '../composables/useAuth'
 
-defineEmits(['login'])
+const router = useRouter()
+const { user, isLoading, loginWithGoogle } = useAuth()
+
+async function handleLogin() {
+  const currentUser = await loginWithGoogle()
+
+  if (currentUser) {
+    router.replace('/home')
+  }
+}
+
+watch(
+  user,
+  (currentUser) => {
+    if (currentUser) {
+      router.replace('/home')
+    }
+  },
+  { immediate: true }
+)
 </script>

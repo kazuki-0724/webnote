@@ -152,7 +152,7 @@
             <div
               v-for="note in store.notesByFolder[folder.id]"
               :key="note.id"
-              @click="store.selectNote(note.id)"
+              @click="handleSelectNote(note)"
               class="group/note flex items-start gap-2 px-2.5 py-2 rounded-xl cursor-pointer transition-all duration-200 mb-0.5 relative"
               :class="store.selectedNoteId === note.id
                 ? 'bg-gradient-to-r from-sky-500/10 to-blue-500/5 shadow-sm ring-1 ring-sky-200/60'
@@ -250,6 +250,17 @@ async function startCreateFolder() {
   newFolderName.value = ''
   await nextTick()
   newFolderInput.value?.focus()
+}
+
+function handleSelectNote(note) {
+  store.selectNote(note.id)
+
+  if (note.type === 'whiteboard') {
+    router.push('/whiteboard')
+    return
+  }
+
+  router.push('/home')
 }
 
 function handleNewFolderKey(e) {
