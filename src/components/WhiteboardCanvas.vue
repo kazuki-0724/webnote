@@ -1,124 +1,87 @@
 <template>
   <div class="relative h-full w-full bg-white">
-    <div class="absolute left-3 top-3 z-10 flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white/85 p-2 shadow-sm backdrop-blur-sm">
-      <button
-        type="button"
-        @click="emit('back-to-top')"
+    <div :class="isToolBarOpen ? 'gap-2' : 'gap-0'"
+      class="absolute left-3 top-3 z-10 flex flex-wrap items-center rounded-2xl border border-slate-200 bg-white/85 p-2 shadow-sm backdrop-blur-sm">
+      <button type="button" @click="isToolBarOpen = !isToolBarOpen"
         class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition-colors hover:bg-slate-200"
-        title="トップに戻る"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-          <path d="M9 18 3 12l6-6" />
-          <path d="M21 12H3" />
+        :title="isToolBarOpen ? 'ツールバーを閉じる' : 'ツールバーを開く'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+          stroke-linejoin="round" class="h-4 w-4">
+          <path d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
+      <div class="toolbar-shell">
+        <transition name="toolbar">
+          <div v-show="isToolBarOpen" class="toolbar-content">
+            <button type="button" @click="emit('back-to-top')"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition-colors hover:bg-slate-200"
+              title="トップに戻る">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                stroke-linejoin="round" class="h-4 w-4">
+                <path d="M9 18 3 12l6-6" />
+                <path d="M21 12H3" />
+              </svg>
+            </button>
+            <input type="text" :value="props.note?.title"
+              @input="emit('title-change', $event.target.value, props.note?.id)"
+              class="bg-transparent text-slate-700 text-sm font-medium focus:outline-none" />
 
-      <input
-        type="text"
-        :value="props.note?.title"
-        @input="emit('title-change', $event.target.value, props.note?.id)"
-        class="bg-transparent text-slate-700 text-sm font-medium focus:outline-none"
-      />
+            <button v-for="tool in toolOptions" :key="tool.value" type="button" @click="selectedTool = tool.value"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-xl transition-colors"
+              :class="selectedTool === tool.value ? 'bg-sky-500 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+              :title="tool.label">
+              <component :is="tool.icon" class="h-4 w-4" />
+            </button>
 
-      <button
-        v-for="tool in toolOptions"
-        :key="tool.value"
-        type="button"
-        @click="selectedTool = tool.value"
-        class="inline-flex h-9 w-9 items-center justify-center rounded-xl transition-colors"
-        :class="selectedTool === tool.value ? 'bg-sky-500 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
-        :title="tool.label"
-      >
-        <component :is="tool.icon" class="h-4 w-4" />
-      </button>
+            <div class="mx-1 h-6 w-px bg-slate-200" />
 
-      <div class="mx-1 h-6 w-px bg-slate-200" />
+            <div class="flex items-center gap-1.5">
+              <button type="button" @click="drawMode = drawMode === 'pen' ? 'handwriting' : 'pen'"
+                class="rounded-lg border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide transition-colors">
+                {{ drawMode === 'pen' ? 'ペン' : '手書き' }}
+              </button>
+            </div>
 
-      <div class="flex items-center gap-1.5">
-        <button
-          v-for="mode in modeOptions"
-          :key="mode.value"
-          type="button"
-          @click="drawMode = mode.value"
-          class="rounded-lg border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide transition-colors"
-          :class="drawMode === mode.value ? 'border-sky-300 bg-sky-50 text-sky-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
-        >
-          {{ mode.label }}
-        </button>
+            <div class="mx-1 h-6 w-px bg-slate-200" />
+
+            <div class="flex items-center gap-1.5">
+              <button v-for="size in sizeOptions[selectedTool] || []" :key="size" type="button"
+                @click="selectedWidth = size"
+                class="inline-flex h-6 w-6 items-center justify-center rounded-full border text-[10px] font-bold transition-colors"
+                :class="selectedWidth === size ? 'border-sky-300 bg-sky-50 text-sky-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
+                :style="{
+                  width: `${size + 7}px`,
+                  height: `${size + 7}px`,
+                  backgroundColor: selectedWidth === size ? '#f0f9ff' : '#ffffff'
+                }" />
+            </div>
+
+            <div class="mx-1 h-6 w-px bg-slate-200" />
+
+            <div v-if="selectedTool !== 'eraser'" class="flex items-center gap-1.5">
+              <button v-for="color in paletteOptions[selectedTool] || []" :key="color.value" type="button"
+                @click="selectedColor = color.value" class="h-5 w-5 rounded-full border-2 transition-all"
+                :class="selectedColor === color.value ? 'border-slate-700 scale-110' : 'border-white hover:border-slate-300'"
+                :style="{ backgroundColor: color.value }" :title="color.label" />
+            </div>
+            <button type="button" @click="clearCanvas"
+              class="ml-1 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800 text-white hover:bg-slate-700"
+              title="キャンバスをクリア">
+              <TrashIcon class="h-4 w-4" />
+            </button>
+          </div>
+        </transition>
       </div>
-
-      <div class="mx-1 h-6 w-px bg-slate-200" />
-
-      <div class="flex items-center gap-1.5">
-        <button
-          v-for="size in sizeOptions[selectedTool] || []"
-          :key="size"
-          type="button"
-          @click="selectedWidth = size"
-          class="inline-flex h-6 w-6 items-center justify-center rounded-full border text-[10px] font-bold transition-colors"
-          :class="selectedWidth === size ? 'border-sky-300 bg-sky-50 text-sky-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
-          :style="{
-            width: `${size + 7}px`,
-            height: `${size + 7}px`,
-            backgroundColor: selectedWidth === size ? '#f0f9ff' : '#ffffff'
-          }"
-        />
-      </div>
-
-      <div class="mx-1 h-6 w-px bg-slate-200" />
-
-      <div class="flex items-center gap-1.5">
-        <span class="text-[10px] font-medium uppercase tracking-wide text-slate-500">色</span>
-        <button
-          v-for="color in paletteOptions[selectedTool] || []"
-          :key="color.value"
-          type="button"
-          @click="selectedColor = color.value"
-          class="h-5 w-5 rounded-full border-2 transition-all"
-          :class="selectedColor === color.value ? 'border-slate-700 scale-110' : 'border-white hover:border-slate-300'"
-          :style="{ backgroundColor: color.value }"
-          :title="color.label"
-        />
-      </div>
-
-      <button
-        type="button"
-        @click="clearCanvas"
-        class="ml-1 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800 text-white hover:bg-slate-700"
-        title="キャンバスをクリア"
-      >
-        <TrashIcon class="h-4 w-4" />
-      </button>
     </div>
 
     <div class="absolute inset-0 overflow-hidden">
-      <div
-        ref="surfaceRef"
-        class="relative whiteboard-surface"
-        :style="surfaceStyle"
-        @pointerdown="onPointerDown"
-        @pointermove="onPointerMove"
-        @pointerup="onPointerUp"
-        @pointerleave="onPointerUp"
-        @pointercancel="onPointerUp"
-      >
-        <svg
-          :width="viewportWidth"
-          :height="viewportHeight"
-          class="block"
-          preserveAspectRatio="xMidYMid meet"
-        >
+      <div ref="surfaceRef" class="relative whiteboard-surface" :style="surfaceStyle" @pointerdown="onPointerDown"
+        @pointermove="onPointerMove" @pointerup="onPointerUp" @pointerleave="onPointerUp" @pointercancel="onPointerUp">
+        <svg :width="viewportWidth" :height="viewportHeight" class="block" preserveAspectRatio="xMidYMid meet">
           <g v-for="stroke in renderedStrokes" :key="stroke.id">
-            <polyline
-              v-if="stroke.tool !== 'eraser'"
-              :points="stroke.points.map((p) => `${p.x},${p.y}`).join(' ')"
-              fill="none"
-              :stroke="stroke.color || '#0f172a'"
-              :stroke-width="stroke.width || 3"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              :stroke-opacity="stroke.tool === 'marker' ? 0.45 : 1"
-            />
+            <polyline v-if="stroke.tool !== 'eraser'" :points="stroke.points.map((p) => `${p.x},${p.y}`).join(' ')"
+              fill="none" :stroke="stroke.color || '#0f172a'" :stroke-width="stroke.width || 3" stroke-linecap="round"
+              stroke-linejoin="round" :stroke-opacity="stroke.tool === 'marker' ? 0.45 : 1" />
           </g>
         </svg>
       </div>
@@ -188,6 +151,7 @@ const drawMode = ref('pen')
 const panOffset = ref({ x: 0, y: 0 })
 const activePointers = new Map()
 const panState = ref(null)
+const isToolBarOpen = ref(true)
 
 const toolOptions = [
   { value: 'pen', label: 'ペン', icon: PenIcon },
@@ -417,6 +381,44 @@ function clearCanvas() {
 </script>
 
 <style scoped>
+.toolbar-shell {
+  position: relative;
+  height: 2.5rem;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.toolbar-content {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.5rem;
+  max-width: 900px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.toolbar-enter-active,
+.toolbar-leave-active {
+  transition: max-width 220ms ease, opacity 180ms ease;
+}
+
+.toolbar-enter-from,
+.toolbar-leave-to {
+  opacity: 0;
+  max-width: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.toolbar-enter-to,
+.toolbar-leave-from {
+  opacity: 1;
+  max-width: 900px;
+}
+
 .whiteboard-surface {
   min-width: 100%;
   min-height: 100%;

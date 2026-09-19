@@ -385,6 +385,73 @@ export const useNotesStore = defineStore('notes', () => {
     })
   }
 
+  function normalizeSingleStroke(stroke) {
+    if (!stroke || typeof stroke !== 'object') {
+      throw new Error('stroke は { tool, color, width, points } 形式で指定してください。')
+    }
+
+    const points = Array.isArray(stroke.points) ? stroke.points : []
+    if (points.length === 0) {
+      throw new Error('stroke.points には最低 1 点以上の座標が必要です。')
+    }
+
+    return {
+      id: stroke.id || `s${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+      tool: stroke.tool || 'pen',
+      color: stroke.color || '#111827',
+      width: Number(stroke.width ?? 3),
+      points: points.map((point) => ({
+        x: Number(point.x),
+        y: Number(point.y),
+      })),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    }
+  }
+
+  function normalizeStrokesInput(rawStroke) {
+    if (!rawStroke) {
+      throw new Error('stroke が指定されていません。')
+    }
+
+    let parsed = rawStroke
+    if (typeof rawStroke === 'string') {
+      try {
+        parsed = JSON.parse(rawStroke)
+      } catch (error) {
+        throw new Error('stroke は JSON 形式で指定してください。')
+      }
+    }
+
+    if (Array.isArray(parsed)) {
+      return parsed.map((stroke) => normalizeSingleStroke(stroke))
+    }
+
+    if (parsed && typeof parsed === 'object') {
+      if (Array.isArray(parsed.strokes)) {
+        return parsed.strokes.map((stroke) => normalizeSingleStroke(stroke))
+      }
+
+      if (Array.isArray(parsed.points)) {
+        return [normalizeSingleStroke(parsed)]
+      }
+    }
+
+    throw new Error('stroke は単一の stroke または strokes 配列で指定してください。')
+  }
+
+  function drawPicture(noteIdOrStroke, maybeStroke) {
+    const noteId = typeof noteIdOrStroke === 'string' ? noteIdOrStroke : selectedNoteId.value
+    const incomingStroke = typeof noteIdOrStroke === 'string' ? maybeStroke : noteIdOrStroke
+
+    if (!noteId) {
+      throw new Error('描画先のノートが選択されていません。')
+    }
+
+    const normalizedStrokes = normalizeStrokesInput(incomingStroke)
+    normalizedStrokes.forEach((stroke) => saveWhiteboardStroke(noteId, stroke))
+  }
+
   function saveWhiteboardStroke(noteId, stroke) {
     const note = getNoteById(noteId)
     if (!note) return
@@ -522,6 +589,7 @@ export const useNotesStore = defineStore('notes', () => {
     createFolder,
     deleteFolder,
     createNote,
+    drawPicture,
     saveWhiteboardStroke,
     clearWhiteboard,
     updateNoteTitle,
