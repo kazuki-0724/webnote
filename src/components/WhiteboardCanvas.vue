@@ -1,77 +1,117 @@
 <template>
   <div class="relative h-full w-full bg-white">
     <div :class="isToolBarOpen ? 'gap-2' : 'gap-0'"
-      class="absolute left-3 top-3 z-10 flex flex-wrap items-center rounded-2xl border border-slate-200 bg-white/85 p-2 shadow-sm backdrop-blur-sm">
-      <button type="button" @click="isToolBarOpen = !isToolBarOpen"
-        class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition-colors hover:bg-slate-200"
-        :title="isToolBarOpen ? 'ツールバーを閉じる' : 'ツールバーを開く'">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-          stroke-linejoin="round" class="h-4 w-4">
-          <path d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
-      <div class="toolbar-shell">
-        <transition name="toolbar">
-          <div v-show="isToolBarOpen" class="toolbar-content">
-            <button type="button" @click="emit('back-to-top')"
-              class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition-colors hover:bg-slate-200"
-              title="トップに戻る">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                stroke-linejoin="round" class="h-4 w-4">
-                <path d="M9 18 3 12l6-6" />
-                <path d="M21 12H3" />
-              </svg>
-            </button>
-            <input type="text" :value="props.note?.title"
-              @input="emit('title-change', $event.target.value, props.note?.id)"
-              class="bg-transparent text-slate-700 text-sm font-medium focus:outline-none" />
+      class="absolute left-3 top-3 z-10 rounded-2xl border border-slate-200 bg-white/50 p-2 shadow-sm backdrop-blur-sm">
+      <div class="toolbar-panel">
+        <div class="toolbar-top-row">
+          <button type="button" @click="isToolBarOpen = !isToolBarOpen"
+            class="toolbar-toggle inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition-all duration-200 hover:bg-slate-200"
+            :title="isToolBarOpen ? 'ツールバーを閉じる' : 'ツールバーを開く'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+              stroke-linejoin="round" class="h-4 w-4">
+              <path d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
 
-            <button v-for="tool in toolOptions" :key="tool.value" type="button" @click="selectedTool = tool.value"
-              class="inline-flex h-9 w-9 items-center justify-center rounded-xl transition-colors"
+          <div class="toolbar-shell" :class="{ 'toolbar-shell-collapsed': !isToolBarOpen }" :style="toolbarShellStyle">
+            <transition name="toolbar">
+              <div ref="toolbarContentRef" :class="['toolbar-content', { 'toolbar-content-collapsed': !isToolBarOpen }]" :style="toolbarContentStyle">
+                <div class="toolbar-row toolbar-row-primary" :class="{ 'toolbar-row-hidden': !isToolBarOpen }">
+                  <button type="button" @click="emit('back-to-top')"
+                    class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition-colors hover:bg-slate-200"
+                    title="トップに戻る">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                      stroke-linejoin="round" class="h-4 w-4">
+                      <path d="M9 18 3 12l6-6" />
+                      <path d="M21 12H3" />
+                    </svg>
+                  </button>
+
+                  <input type="text" :value="props.note?.title"
+                    @input="emit('title-change', $event.target.value, props.note?.id)"
+                    class="toolbar-title bg-transparent text-sm font-medium text-slate-700 focus:outline-none" />
+
+                  <template v-if="!isMobileViewport">
+                    <div class="toolbar-tools">
+                      <button v-for="tool in toolOptions" :key="tool.value" type="button" @click="handleToolSelect(tool.value)"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-xl transition-colors"
+                        :class="selectedTool === tool.value ? 'bg-sky-500 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                        :title="tool.label">
+                        <component :is="tool.icon" class="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    <div class="toolbar-size" :class="{ 'is-mobile-color-open': isColorPaletteOpen }">
+                      <button v-for="size in sizeOptions[selectedTool] || []" :key="size" type="button"
+                        @click="handleWidthSelect(size, $event)"
+                        class="size-option-button"
+                        :class="selectedWidth === size ? 'size-option-button-selected' : ''"
+                        :style="{
+                          width: `${size * 1.5}px`,
+                          height: `${size * 1.5}px`,
+                          backgroundColor: selectedColor,
+                          borderColor: selectedWidth === size ? 'rgba(15, 23, 42, 0.9)' : 'rgba(148, 163, 184, 0.7)',
+                          boxShadow: selectedWidth === size ? 'inset 0 0 0 2px rgba(255,255,255,0.9), 0 0 0 2px rgba(14,165,233,0.18)' : 'inset 0 0 0 1px rgba(255,255,255,0.7)'
+                        }"
+                        :title="`太さ ${size}px`" />
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </transition>
+          </div>
+        </div>
+      </div>
+
+      <transition name="toolbar">
+        <div v-if="isToolBarOpen && isMobileViewport" class="toolbar-bottom-row">
+          <div class="toolbar-tools">
+            <button v-for="tool in toolOptions" :key="tool.value" type="button" @click="handleToolSelect(tool.value)"
+              class="tool-option-button inline-flex h-9 w-9 items-center justify-center rounded-xl transition-colors"
               :class="selectedTool === tool.value ? 'bg-sky-500 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
               :title="tool.label">
               <component :is="tool.icon" class="h-4 w-4" />
             </button>
-
-            <div class="mx-1 h-6 w-px bg-slate-200" />
-
-            <div class="flex items-center gap-1.5">
-              <button type="button" @click="drawMode = drawMode === 'pen' ? 'handwriting' : 'pen'"
-                class="rounded-lg border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide transition-colors">
-                {{ drawMode === 'pen' ? 'ペン' : '手書き' }}
-              </button>
-            </div>
-
-            <div class="mx-1 h-6 w-px bg-slate-200" />
-
-            <div class="flex items-center gap-1.5">
-              <button v-for="size in sizeOptions[selectedTool] || []" :key="size" type="button"
-                @click="selectedWidth = size"
-                class="inline-flex h-6 w-6 items-center justify-center rounded-full border text-[10px] font-bold transition-colors"
-                :class="selectedWidth === size ? 'border-sky-300 bg-sky-50 text-sky-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
-                :style="{
-                  width: `${size + 7}px`,
-                  height: `${size + 7}px`,
-                  backgroundColor: selectedWidth === size ? '#f0f9ff' : '#ffffff'
-                }" />
-            </div>
-
-            <div class="mx-1 h-6 w-px bg-slate-200" />
-
-            <div v-if="selectedTool !== 'eraser'" class="flex items-center gap-1.5">
-              <button v-for="color in paletteOptions[selectedTool] || []" :key="color.value" type="button"
-                @click="selectedColor = color.value" class="h-5 w-5 rounded-full border-2 transition-all"
-                :class="selectedColor === color.value ? 'border-slate-700 scale-110' : 'border-white hover:border-slate-300'"
-                :style="{ backgroundColor: color.value }" :title="color.label" />
-            </div>
-            <button type="button" @click="clearCanvas"
-              class="ml-1 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800 text-white hover:bg-slate-700"
-              title="キャンバスをクリア">
-              <TrashIcon class="h-4 w-4" />
-            </button>
           </div>
-        </transition>
+
+          <div class="toolbar-size" :class="{ 'is-mobile-color-open': isColorPaletteOpen }">
+            <button v-for="size in sizeOptions[selectedTool] || []" :key="size" type="button"
+              @click="handleWidthSelect(size, $event)"
+              class="size-option-button"
+              :class="selectedWidth === size ? 'size-option-button-selected' : ''"
+              :style="{
+                width: `${size * 1.5}px`,
+                height: `${size * 1.5}px`,
+                backgroundColor: selectedColor,
+                borderColor: selectedWidth === size ? 'rgba(15, 23, 42, 0.9)' : 'rgba(148, 163, 184, 0.7)',
+                boxShadow: selectedWidth === size ? 'inset 0 0 0 2px rgba(255,255,255,0.9), 0 0 0 2px rgba(14,165,233,0.18)' : 'inset 0 0 0 1px rgba(255,255,255,0.7)'
+              }"
+              :title="`太さ ${size}px`" />
+          </div>
+        </div>
+      </transition>
+
+      <div class="pen-mode-tooltip" role="menu" aria-label="ペンモード選択" :class="{ 'pen-mode-tooltip-hidden': !isPenModeMenuOpen || !isToolBarOpen }" v-show="( selectedTool === 'pen' || selectedTool === 'marker') && isPenModeMenuOpen && isToolBarOpen">
+        <button type="button" class="pen-mode-option" @click="selectPenMode('pen')">
+          ペンモード
+        </button>
+        <button type="button" class="pen-mode-option" @click="selectPenMode('handwriting')">
+          手書きモード
+        </button>
       </div>
+    </div>
+
+    <div
+      v-if="isColorPaletteOpen && ( selectedTool === 'pen' || selectedTool === 'marker')"
+      ref="colorPalettePopupRef"
+      class="color-palette-popup"
+      :style="colorPalettePopupStyle"
+    >
+      <button v-for="color in paletteOptions[selectedTool] || []" :key="color.value" type="button"
+        @click="selectColor(color.value)"
+        class="mobile-color-button"
+        :style="{ backgroundColor: color.value }"
+        :title="color.label" />
     </div>
 
     <div class="absolute inset-0 overflow-hidden">
@@ -152,6 +192,61 @@ const panOffset = ref({ x: 0, y: 0 })
 const activePointers = new Map()
 const panState = ref(null)
 const isToolBarOpen = ref(true)
+const isColorPaletteOpen = ref(false)
+const isPenModeMenuOpen = ref(false)
+const isMobileViewport = ref(typeof window !== 'undefined' ? window.innerWidth <= 640 : false)
+const colorPaletteAnchor = ref(null)
+const colorPalettePopupRef = ref(null)
+const toolbarContentRef = ref(null)
+const toolbarWidth = ref(0)
+
+const collapsedToolbarSize = 0
+
+const toolbarContentStyle = computed(() => ({
+  width: isToolBarOpen.value ? (isMobileViewport.value ? 'min(100%, calc(100vw - 6.5rem))' : `${toolbarWidth.value || 260}px`) : `${collapsedToolbarSize}px`,
+  height: isToolBarOpen.value ? 'auto' : `${collapsedToolbarSize}px`,
+  minWidth: isToolBarOpen.value ? (isMobileViewport.value ? '0' : 'max-content') : `${collapsedToolbarSize}px`,
+  maxWidth: isToolBarOpen.value ? (isMobileViewport.value ? 'calc(100vw - 6.5rem)' : 'min(900px, calc(100vw - 5.5rem))') : `${collapsedToolbarSize}px`,
+}))
+
+const toolbarShellStyle = computed(() => ({
+  width: isToolBarOpen.value ? (isMobileViewport.value ? 'min(100%, calc(100vw - 6.5rem))' : `${toolbarWidth.value || 260}px`) : `${collapsedToolbarSize}px`,
+  height: isToolBarOpen.value ? 'auto' : `${collapsedToolbarSize}px`,
+  minWidth: isToolBarOpen.value ? (isMobileViewport.value ? '0' : 'max-content') : `${collapsedToolbarSize}px`,
+  maxWidth: isToolBarOpen.value ? (isMobileViewport.value ? 'calc(100vw - 6.5rem)' : 'min(900px, calc(100vw - 5.5rem))') : `${collapsedToolbarSize}px`,
+}))
+
+const colorPalettePopupStyle = computed(() => {
+  const anchor = colorPaletteAnchor.value
+  if (!anchor) {
+    return { left: '10.5rem', top: '4.25rem' }
+  }
+
+  const rect = anchor.getBoundingClientRect()
+  const popupWidth = colorPalettePopupRef.value?.offsetWidth || 180
+  const popupHeight = colorPalettePopupRef.value?.offsetHeight || 56
+  const margin = 12
+  const targetX = rect.left + rect.width / 2 - 6
+  const fixedTop = rect.bottom / 2 + popupHeight + margin
+  // TODO: 高さ合わせたい
+
+  const left = targetX - popupWidth / 2
+  const top = Math.min(Math.max(fixedTop, 12), window.innerHeight - popupHeight - margin)
+
+  return {
+    left: `${left}px`,
+    top: `${top}px`,
+    '--callout-left': `${Math.max(0, targetX - left)}px`,
+  }
+})
+
+const updateViewportMode = () => {
+  isMobileViewport.value = window.innerWidth <= 640
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('resize', updateViewportMode)
+}
 
 const toolOptions = [
   { value: 'pen', label: 'ペン', icon: PenIcon },
@@ -165,7 +260,7 @@ const modeOptions = [
 ]
 
 const sizeOptions = {
-  pen: [2, 3, 5, 7, 10],
+  pen: [4, 6, 10, 14, 20],
   marker: [8, 16, 24],
   eraser: [8, 16, 24],
 }
@@ -222,8 +317,23 @@ watch(
 )
 
 watch(
+  () => [isToolBarOpen.value, props.note?.id],
+  () => {
+    if (!toolbarContentRef.value || !isToolBarOpen.value) {
+      toolbarWidth.value = 260
+      return
+    }
+
+    const width = toolbarContentRef.value.scrollWidth || toolbarContentRef.value.offsetWidth || 260
+    toolbarWidth.value = Math.max(width, 260)
+  },
+  { flush: 'post' }
+)
+
+watch(
   selectedTool,
   (tool) => {
+    isColorPaletteOpen.value = false
     if (tool === 'pen') {
       selectedWidth.value = 5
       selectedColor.value = '#111827'
@@ -239,6 +349,68 @@ watch(
   },
   { immediate: true }
 )
+
+function handleWidthSelect(size, event) {
+  const isSameSize = size === selectedWidth.value
+  selectedWidth.value = size
+  colorPaletteAnchor.value = event?.currentTarget || null
+
+  if ((selectedTool.value === 'pen' || selectedTool.value === 'marker') && isSameSize) {
+    toggleColorPalette()
+    return
+  }
+
+  isColorPaletteOpen.value = false
+}
+
+function handleToolSelect(toolValue) {
+  if (toolValue === 'pen') {
+    if (selectedTool.value === 'pen') {
+      isPenModeMenuOpen.value =  !isPenModeMenuOpen.value
+      return
+    }
+
+    selectedTool.value = 'pen'
+    isPenModeMenuOpen.value = false
+    return
+  }
+
+  if (toolValue === 'eraser') {
+    if (selectedTool.value === 'eraser') {
+      const shouldClear = window.confirm('キャンバスをクリアしますか？')
+      if (shouldClear) {
+        clearCanvas()
+      }
+      return
+    }
+
+    selectedTool.value = 'eraser'
+    isPenModeMenuOpen.value = false
+    isColorPaletteOpen.value = false
+    return
+  }
+
+  isPenModeMenuOpen.value = false
+  selectedTool.value = toolValue
+}
+
+function selectPenMode(mode) {
+  drawMode.value = mode
+  selectedTool.value = 'pen'
+  isPenModeMenuOpen.value = false
+}
+
+function toggleColorPalette() {
+  if (selectedTool.value === 'eraser') {
+    return
+  }
+  isColorPaletteOpen.value = !isColorPaletteOpen.value
+}
+
+function selectColor(color) {
+  selectedColor.value = color
+  isColorPaletteOpen.value = false
+}
 
 function getPointerMidpoint() {
   const points = [...activePointers.values()]
@@ -381,34 +553,209 @@ function clearCanvas() {
 </script>
 
 <style scoped>
-.toolbar-shell {
-  position: relative;
-  height: 2.5rem;
-  min-width: 0;
+.toolbar-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  width: max-content;
+  max-width: calc(100vw - 5.5rem);
+}
+
+.toolbar-top-row {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
+  width: max-content;
+  max-width: calc(100vw - 5.5rem);
+}
+
+.toolbar-shell {
+  position: relative;
+  min-height: 2.5rem;
+  min-width: max-content;
+  width: max-content;
+  max-width: min(900px, calc(100vw - 5.5rem));
+  display: flex;
+  align-items: flex-start;
+  flex: 0 0 auto;
+  overflow: hidden;
+  overflow-y: visible;
+  transition:
+    width 0.26s ease,
+    min-width 0.26s ease,
+    max-width 0.26s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.toolbar-shell-collapsed {
+  width: 0;
+  height: 0;
+  min-width: 0;
+  min-height: 0;
+  max-width: 0;
+  max-height: 0;
+  opacity: 1;
+  pointer-events: auto;
+  overflow: hidden;
+  transform: none;
+}
+
+.toolbar-bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: max-content;
+  max-width: calc(100vw - 6.5rem);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.toolbar-toggle {
+  flex-shrink: 0;
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.toolbar-toggle:hover {
+  transform: translateY(-1px);
 }
 
 .toolbar-content {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  width: 260px;
+  min-width: 0;
+  max-width: min(900px, calc(100vw - 5.5rem));
+  max-height: 12rem;
+  overflow: hidden;
+  white-space: normal;
+  flex-shrink: 0;
+  transition:
+    width 0.26s ease,
+    min-width 0.26s ease,
+    max-width 0.26s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+@media (max-width: 640px) {
+  .toolbar-shell {
+    overflow: hidden;
+  }
+}
+
+.toolbar-content-collapsed {
+  width: 0;
+  height: 0;
+  min-width: 0;
+  min-height: 0;
+  max-width: 0;
+  max-height: 0;
+  opacity: 1;
+  pointer-events: auto;
+  overflow: hidden;
+  transform: none;
+}
+
+.toolbar-row {
+  display: flex;
   align-items: center;
   gap: 0.5rem;
-  height: 2.5rem;
-  max-width: 900px;
+  width: max-content;
+  max-width: 100%;
+  min-width: max-content;
+  max-height: 3rem;
   overflow: hidden;
-  white-space: nowrap;
+  align-self: flex-start;
+  flex-shrink: 0;
+  transition:
+    width 0.22s ease,
+    max-width 0.22s ease,
+    min-width 0.22s ease,
+    opacity 0.18s ease,
+    transform 0.22s ease,
+    padding 0.22s ease,
+    margin 0.22s ease;
+}
+
+.toolbar-row-hidden {
+  width: 0;
+  max-width: 0;
+  min-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateX(-0.3rem);
+  pointer-events: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toolbar-row-primary {
+  min-height: 2.5rem;
+}
+
+.toolbar-row-secondary {
+  min-height: 2.5rem;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+}
+
+.toolbar-tools,
+.toolbar-size,
+.toolbar-colors,
+.toolbar-mode {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toolbar-tools {
+  flex: 0 0 auto;
+  min-width: 0;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.tool-option-button {
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+}
+
+.toolbar-size,
+.toolbar-colors {
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+}
+
+.toolbar-title {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .toolbar-enter-active,
 .toolbar-leave-active {
-  transition: max-width 220ms ease, opacity 180ms ease;
+  transition:
+    max-width 220ms ease,
+    max-height 220ms ease,
+    opacity 180ms ease,
+    transform 220ms ease;
 }
 
 .toolbar-enter-from,
 .toolbar-leave-to {
   opacity: 0;
   max-width: 0;
+  max-height: 0;
   overflow: hidden;
   pointer-events: none;
 }
@@ -416,7 +763,186 @@ function clearCanvas() {
 .toolbar-enter-to,
 .toolbar-leave-from {
   opacity: 1;
-  max-width: 900px;
+  max-width: min(900px, calc(100vw - 5.5rem));
+  max-height: 12rem;
+}
+
+.size-option-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid rgba(148, 163, 184, 0.8);
+  background-color: #ffffff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+}
+
+.size-option-button:active {
+  transform: scale(0.96);
+}
+
+.size-option-button-selected {
+  border-color: rgba(15, 23, 42, 0.9);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.9), 0 0 0 2px rgba(14, 165, 233, 0.18);
+}
+
+.color-palette-popup {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12);
+  z-index: 100;
+  flex-wrap: wrap;
+  max-width: 12.5rem;
+  pointer-events: auto;
+}
+
+.color-palette-popup::before {
+  content: "";
+  position: absolute;
+  left: var(--callout-left, calc(50% - 0.375rem));
+  top: -0.4rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  background: rgba(255, 255, 255, 0.98);
+  border-left: 1px solid rgba(148, 163, 184, 0.7);
+  border-top: 1px solid rgba(148, 163, 184, 0.7);
+  transform: rotate(45deg);
+}
+
+.mobile-color-button {
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 9999px;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.2);
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .toolbar-content {
+    width: max-content;
+    min-width: 18rem;
+    max-width: calc(100vw - 6.5rem);
+    gap: 0.375rem;
+  }
+
+  .toolbar-content-collapsed {
+    width: 0;
+    min-width: 0;
+    max-width: 0;
+  }
+
+  .toolbar-row {
+    width: max-content;
+    min-width: 18rem;
+    max-width: calc(100vw - 6.5rem);
+  }
+
+  .toolbar-row-primary {
+    flex-wrap: nowrap;
+  }
+
+  .toolbar-row-secondary {
+    justify-content: space-between;
+    padding-top: 0.125rem;
+  }
+
+  .toolbar-tools {
+    width: auto;
+    justify-content: space-between;
+  }
+
+  .pen-mode-tooltip {
+    position: absolute;
+    left: 0;
+    top: calc(100% + 0.5rem);
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 0.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.7);
+    border-radius: 0.9rem;
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.14);
+    z-index: 30;
+    min-width: 8rem;
+  }
+
+  .pen-mode-option {
+    border-radius: 0.7rem;
+    padding: 0.45rem 0.6rem;
+    text-align: left;
+    font-size: 0.72rem;
+    color: #334155;
+    background: #f8fafc;
+    transition: background-color 0.15s ease;
+  }
+
+  .pen-mode-option:hover {
+    background: #e2e8f0;
+  }
+
+  .toolbar-mode,
+  .toolbar-size,
+  .toolbar-colors {
+    flex: 1 1 auto;
+  }
+
+  .toolbar-size {
+    position: relative;
+  }
+}
+
+.pen-mode-tooltip {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 0.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.14);
+  z-index: 30;
+  min-width: 8rem;
+  opacity: 1;
+  max-height: 10rem;
+  overflow: hidden;
+  transition: opacity 0.2s ease, max-height 0.2s ease, transform 0.2s ease;
+}
+
+.pen-mode-tooltip-hidden {
+  opacity: 0;
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-width: 0;
+  transform: translateY(-0.25rem);
+  pointer-events: none;
+}
+
+.pen-mode-option {
+  border-radius: 0.7rem;
+  padding: 0.45rem 0.6rem;
+  text-align: left;
+  font-size: 0.72rem;
+  color: #334155;
+  background: #f8fafc;
+  transition: background-color 0.15s ease;
+}
+
+.pen-mode-option:hover {
+  background: #e2e8f0;
 }
 
 .whiteboard-surface {
