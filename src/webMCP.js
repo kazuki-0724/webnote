@@ -169,7 +169,7 @@ const tools = [
         name: "drawPicture",
         description: "ノートに絵を描くツールです。AI はライオンなどの複雑な図を複数の stroke で構成して、ここにまとめて流し込めます。",
         parameters: {
-            stroke: {
+            strokes: {
                 type: "string",
                 description: "描画用の stroke JSON。単一 stroke でも、strokes 配列でも指定可能。例: {\"tool\":\"pen\",\"color\":\"#111827\",\"width\":5,\"points\":[{\"x\":100,\"y\":150},{\"x\":120,\"y\":170}]} または {\"strokes\":[{...},{...}] }"
             },
@@ -180,7 +180,7 @@ const tools = [
         },
         execute: async (args) => {
             try {
-                const normalizedStroke = normalizeStroke(args.stroke)
+                const normalizedStroke = normalizeStroke(args.strokes)
                 const store = useNotesStore()
                 const targetNoteId = args.noteId || store.selectedNoteId
 

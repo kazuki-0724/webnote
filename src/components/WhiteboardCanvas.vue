@@ -1,9 +1,9 @@
 <template>
-  <div class="relative h-full w-full bg-white">
+  <div class="relative h-full w-full bg-slate-100">
     <div :class="isToolBarOpen ? 'gap-2' : 'gap-0'"
       class="absolute left-3 top-3 z-10 rounded-2xl border border-slate-200 bg-white/50 p-2 shadow-sm backdrop-blur-sm">
       <div class="toolbar-panel">
-        <div class="toolbar-top-row">
+        <div class="toolbar-top-row" :class="isToolBarOpen ? 'gap-2' : 'gap-0'">
           <button type="button" @click="isToolBarOpen = !isToolBarOpen"
             class="toolbar-toggle inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition-all duration-200 hover:bg-slate-200"
             :title="isToolBarOpen ? 'ツールバーを閉じる' : 'ツールバーを開く'">
@@ -15,7 +15,8 @@
 
           <div class="toolbar-shell" :class="{ 'toolbar-shell-collapsed': !isToolBarOpen }" :style="toolbarShellStyle">
             <transition name="toolbar">
-              <div ref="toolbarContentRef" :class="['toolbar-content', { 'toolbar-content-collapsed': !isToolBarOpen }]" :style="toolbarContentStyle">
+              <div ref="toolbarContentRef" :class="['toolbar-content', { 'toolbar-content-collapsed': !isToolBarOpen }]"
+                :style="toolbarContentStyle">
                 <div class="toolbar-row toolbar-row-primary" :class="{ 'toolbar-row-hidden': !isToolBarOpen }">
                   <button type="button" @click="emit('back-to-top')"
                     class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition-colors hover:bg-slate-200"
@@ -33,7 +34,8 @@
 
                   <template v-if="!isMobileViewport">
                     <div class="toolbar-tools">
-                      <button v-for="tool in toolOptions" :key="tool.value" type="button" @click="handleToolSelect(tool.value)"
+                      <button v-for="tool in toolOptions" :key="tool.value" type="button"
+                        @click="handleToolSelect(tool.value)"
                         class="inline-flex h-9 w-9 items-center justify-center rounded-xl transition-colors"
                         :class="selectedTool === tool.value ? 'bg-sky-500 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
                         :title="tool.label">
@@ -43,19 +45,29 @@
 
                     <div class="toolbar-size" :class="{ 'is-mobile-color-open': isColorPaletteOpen }">
                       <button v-for="size in sizeOptions[selectedTool] || []" :key="size" type="button"
-                        @click="handleWidthSelect(size, $event)"
-                        class="size-option-button"
-                        :class="selectedWidth === size ? 'size-option-button-selected' : ''"
-                        :style="{
+                        @click="handleWidthSelect(size, $event)" class="size-option-button"
+                        :class="selectedWidth === size ? 'size-option-button-selected' : ''" :style="{
                           width: `${size * 1.5}px`,
                           height: `${size * 1.5}px`,
                           backgroundColor: selectedColor,
                           borderColor: selectedWidth === size ? 'rgba(15, 23, 42, 0.9)' : 'rgba(148, 163, 184, 0.7)',
                           boxShadow: selectedWidth === size ? 'inset 0 0 0 2px rgba(255,255,255,0.9), 0 0 0 2px rgba(14,165,233,0.18)' : 'inset 0 0 0 1px rgba(255,255,255,0.7)'
-                        }"
-                        :title="`太さ ${size}px`" />
+                        }" :title="`太さ ${size}px`" />
                     </div>
-                  </template>
+                    <button @click="handleShareToggle"
+                      class="flex items-center gap-2 rounded-xl border border-white/80 px-3 py-2 text-[13px] font-semibold shadow-sm transition-colors hover:bg-sky-50 hover:text-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300"
+                      :class="store.sharedState ? 'bg-sky-50 text-sky-700' : 'bg-white/70 text-slate-600'"
+                      :title="store.sharedState ? '共有設定を開く' : 'ノートを共有する'">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"
+                        aria-hidden="true">
+                        <circle cx="18" cy="5" r="3" />
+                        <circle cx="6" cy="12" r="3" />
+                        <circle cx="18" cy="19" r="3" />
+                        <path d="m8.7 10.7 6.6-4.4M8.7 13.3l6.6 4.4" />
+                      </svg>
+                    </button>
+                   </template>
                 </div>
               </div>
             </transition>
@@ -76,22 +88,33 @@
 
           <div class="toolbar-size" :class="{ 'is-mobile-color-open': isColorPaletteOpen }">
             <button v-for="size in sizeOptions[selectedTool] || []" :key="size" type="button"
-              @click="handleWidthSelect(size, $event)"
-              class="size-option-button"
-              :class="selectedWidth === size ? 'size-option-button-selected' : ''"
-              :style="{
+              @click="handleWidthSelect(size, $event)" class="size-option-button"
+              :class="selectedWidth === size ? 'size-option-button-selected' : ''" :style="{
                 width: `${size * 1.5}px`,
                 height: `${size * 1.5}px`,
                 backgroundColor: selectedColor,
                 borderColor: selectedWidth === size ? 'rgba(15, 23, 42, 0.9)' : 'rgba(148, 163, 184, 0.7)',
                 boxShadow: selectedWidth === size ? 'inset 0 0 0 2px rgba(255,255,255,0.9), 0 0 0 2px rgba(14,165,233,0.18)' : 'inset 0 0 0 1px rgba(255,255,255,0.7)'
-              }"
-              :title="`太さ ${size}px`" />
+              }" :title="`太さ ${size}px`" />
           </div>
+          <button @click="handleShareToggle"
+            class="flex items-center gap-2 rounded-xl border border-white/80 px-3 py-2 text-[13px] font-semibold shadow-sm transition-colors hover:bg-sky-50 hover:text-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300"
+            :class="store.sharedState ? 'bg-sky-50 text-sky-700' : 'bg-white/70 text-slate-600'"
+            :title="store.sharedState ? '共有設定を開く' : 'ノートを共有する'">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
+              <circle cx="18" cy="5" r="3" />
+              <circle cx="6" cy="12" r="3" />
+              <circle cx="18" cy="19" r="3" />
+              <path d="m8.7 10.7 6.6-4.4M8.7 13.3l6.6 4.4" />
+            </svg>
+          </button>
         </div>
       </transition>
 
-      <div class="pen-mode-tooltip" role="menu" aria-label="ペンモード選択" :class="{ 'pen-mode-tooltip-hidden': !isPenModeMenuOpen || !isToolBarOpen }" v-show="( selectedTool === 'pen' || selectedTool === 'marker') && isPenModeMenuOpen && isToolBarOpen">
+      <div class="pen-mode-tooltip" role="menu" aria-label="ペンモード選択"
+        :class="{ 'pen-mode-tooltip-hidden': !isPenModeMenuOpen || !isToolBarOpen }"
+        v-show="(selectedTool === 'pen' || selectedTool === 'marker') && isPenModeMenuOpen && isToolBarOpen">
         <button type="button" class="pen-mode-option" @click="selectPenMode('pen')">
           ペンモード
         </button>
@@ -101,16 +124,10 @@
       </div>
     </div>
 
-    <div
-      v-if="isColorPaletteOpen && ( selectedTool === 'pen' || selectedTool === 'marker')"
-      ref="colorPalettePopupRef"
-      class="color-palette-popup"
-      :style="colorPalettePopupStyle"
-    >
+    <div v-if="isColorPaletteOpen && (selectedTool === 'pen' || selectedTool === 'marker')" ref="colorPalettePopupRef"
+      class="color-palette-popup" :style="colorPalettePopupStyle">
       <button v-for="color in paletteOptions[selectedTool] || []" :key="color.value" type="button"
-        @click="selectColor(color.value)"
-        class="mobile-color-button"
-        :style="{ backgroundColor: color.value }"
+        @click="selectColor(color.value)" class="mobile-color-button" :style="{ backgroundColor: color.value }"
         :title="color.label" />
     </div>
 
@@ -131,6 +148,9 @@
 
 <script setup>
 import { computed, ref, watch, h } from 'vue'
+import { useNotesStore } from '../store/notes'
+
+const store = useNotesStore()
 
 const PenIcon = {
   render() {
@@ -159,18 +179,6 @@ const EraserIcon = {
   }
 }
 
-const TrashIcon = {
-  render() {
-    return h('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.8', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', class: 'h-4 w-4' }, [
-      h('path', { d: 'M3 6h18' }),
-      h('path', { d: 'M8 6V4h8v2' }),
-      h('path', { d: 'M19 6l-1 14H6L5 6' }),
-      h('path', { d: 'M10 11v6' }),
-      h('path', { d: 'M14 11v6' }),
-    ])
-  }
-}
-
 const props = defineProps({
   note: {
     type: Object,
@@ -185,7 +193,7 @@ const currentStroke = ref(null)
 const viewportWidth = ref(1800)
 const viewportHeight = ref(1200)
 const selectedTool = ref('pen')
-const selectedWidth = ref(3)
+const selectedWidth = ref(11)
 const selectedColor = ref('#111827')
 const drawMode = ref('pen')
 const panOffset = ref({ x: 0, y: 0 })
@@ -200,20 +208,21 @@ const colorPalettePopupRef = ref(null)
 const toolbarContentRef = ref(null)
 const toolbarWidth = ref(0)
 
-const collapsedToolbarSize = 0
+const collapsedToolbarWidth = 0
+const collapsedToolbarHeight = 40
 
 const toolbarContentStyle = computed(() => ({
-  width: isToolBarOpen.value ? (isMobileViewport.value ? 'min(100%, calc(100vw - 6.5rem))' : `${toolbarWidth.value || 260}px`) : `${collapsedToolbarSize}px`,
-  height: isToolBarOpen.value ? 'auto' : `${collapsedToolbarSize}px`,
-  minWidth: isToolBarOpen.value ? (isMobileViewport.value ? '0' : 'max-content') : `${collapsedToolbarSize}px`,
-  maxWidth: isToolBarOpen.value ? (isMobileViewport.value ? 'calc(100vw - 6.5rem)' : 'min(900px, calc(100vw - 5.5rem))') : `${collapsedToolbarSize}px`,
+  width: isToolBarOpen.value ? (isMobileViewport.value ? 'min(100%, calc(100vw - 6.5rem))' : `${toolbarWidth.value || 260}px`) : `${collapsedToolbarWidth}px`,
+  height: isToolBarOpen.value ? 'auto' : `${collapsedToolbarHeight}px`,
+  minWidth: isToolBarOpen.value ? (isMobileViewport.value ? '0' : 'max-content') : `${collapsedToolbarWidth}px`,
+  maxWidth: isToolBarOpen.value ? (isMobileViewport.value ? 'calc(100vw - 6.5rem)' : 'min(900px, calc(100vw - 5.5rem))') : `${collapsedToolbarWidth}px`,
 }))
 
 const toolbarShellStyle = computed(() => ({
-  width: isToolBarOpen.value ? (isMobileViewport.value ? 'min(100%, calc(100vw - 6.5rem))' : `${toolbarWidth.value || 260}px`) : `${collapsedToolbarSize}px`,
-  height: isToolBarOpen.value ? 'auto' : `${collapsedToolbarSize}px`,
-  minWidth: isToolBarOpen.value ? (isMobileViewport.value ? '0' : 'max-content') : `${collapsedToolbarSize}px`,
-  maxWidth: isToolBarOpen.value ? (isMobileViewport.value ? 'calc(100vw - 6.5rem)' : 'min(900px, calc(100vw - 5.5rem))') : `${collapsedToolbarSize}px`,
+  width: isToolBarOpen.value ? (isMobileViewport.value ? 'min(100%, calc(100vw - 6.5rem))' : `${toolbarWidth.value || 260}px`) : `${collapsedToolbarWidth}px`,
+  height: isToolBarOpen.value ? 'auto' : `${collapsedToolbarHeight}px`,
+  minWidth: isToolBarOpen.value ? (isMobileViewport.value ? '0' : 'max-content') : `${collapsedToolbarWidth}px`,
+  maxWidth: isToolBarOpen.value ? (isMobileViewport.value ? 'calc(100vw - 6.5rem)' : 'min(900px, calc(100vw - 5.5rem))') : `${collapsedToolbarWidth}px`,
 }))
 
 const colorPalettePopupStyle = computed(() => {
@@ -254,13 +263,8 @@ const toolOptions = [
   { value: 'eraser', label: '消しゴム', icon: EraserIcon },
 ]
 
-const modeOptions = [
-  { value: 'pen', label: 'ペン' },
-  { value: 'handwriting', label: '手書き' },
-]
-
 const sizeOptions = {
-  pen: [4, 6, 10, 14, 20],
+  pen: [5, 8, 11, 14, 17],
   marker: [8, 16, 24],
   eraser: [8, 16, 24],
 }
@@ -335,7 +339,7 @@ watch(
   (tool) => {
     isColorPaletteOpen.value = false
     if (tool === 'pen') {
-      selectedWidth.value = 5
+      selectedWidth.value = 11
       selectedColor.value = '#111827'
     }
     if (tool === 'marker') {
@@ -366,7 +370,7 @@ function handleWidthSelect(size, event) {
 function handleToolSelect(toolValue) {
   if (toolValue === 'pen') {
     if (selectedTool.value === 'pen') {
-      isPenModeMenuOpen.value =  !isPenModeMenuOpen.value
+      isPenModeMenuOpen.value = !isPenModeMenuOpen.value
       return
     }
 
@@ -550,6 +554,10 @@ function onPointerUp(event) {
 function clearCanvas() {
   emit('clear-canvas')
 }
+
+async function handleShareToggle() {
+  await store.handleShareToggle()
+}
 </script>
 
 <style scoped>
@@ -565,7 +573,6 @@ function clearCanvas() {
 .toolbar-top-row {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   width: max-content;
   max-width: calc(100vw - 5.5rem);
 }
@@ -591,11 +598,11 @@ function clearCanvas() {
 
 .toolbar-shell-collapsed {
   width: 0;
-  height: 0;
+  height: 2.5rem;
   min-width: 0;
-  min-height: 0;
+  min-height: 2.5rem;
   max-width: 0;
-  max-height: 0;
+  max-height: 2.5rem;
   opacity: 1;
   pointer-events: auto;
   overflow: hidden;
@@ -605,12 +612,15 @@ function clearCanvas() {
 .toolbar-bottom-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
+  gap: 0.25rem;
   width: max-content;
-  max-width: calc(100vw - 6.5rem);
+  max-width: calc(100vw - 2rem);
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
+}
+
+.toolbar-bottom-row > button {
+  flex-shrink: 0;
 }
 
 .toolbar-toggle {
@@ -652,11 +662,11 @@ function clearCanvas() {
 
 .toolbar-content-collapsed {
   width: 0;
-  height: 0;
+  height: 2.5rem;
   min-width: 0;
-  min-height: 0;
+  min-height: 2.5rem;
   max-width: 0;
-  max-height: 0;
+  max-height: 2.5rem;
   opacity: 1;
   pointer-events: auto;
   overflow: hidden;
@@ -698,6 +708,7 @@ function clearCanvas() {
 
 .toolbar-row-primary {
   min-height: 2.5rem;
+  padding: 3px 4px 3px 2px;
 }
 
 .toolbar-row-secondary {
@@ -827,6 +838,11 @@ function clearCanvas() {
 }
 
 @media (max-width: 640px) {
+  .toolbar-panel,
+  .toolbar-top-row {
+    max-width: calc(100vw - 2rem);
+  }
+
   .toolbar-content {
     width: max-content;
     min-width: 18rem;
@@ -858,6 +874,11 @@ function clearCanvas() {
   .toolbar-tools {
     width: auto;
     justify-content: space-between;
+    gap: 0.25rem;
+  }
+
+  .toolbar-size {
+    gap: 0.25rem;
   }
 
   .pen-mode-tooltip {

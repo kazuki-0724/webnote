@@ -4,6 +4,7 @@ import AuthGate from '../components/AuthGate.vue'
 import Home from '../components/Home.vue'
 import Login from '../components/Login.vue'
 import WhiteboardPage from '../components/WhiteboardPage.vue'
+import SharedViewer from '../components/SharedViewer.vue'
 
 const routes = [
   {
@@ -31,7 +32,12 @@ const routes = [
     name: 'whiteboard',
     component: WhiteboardPage,
     meta: { requiresAuth: true }
-  }
+  },
+  {
+    path: '/shared-viewer',
+    name: 'sharedviewer',
+    component: SharedViewer
+  },
 ]
 
 const router = createRouter({
@@ -41,6 +47,10 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const { user, authReady } = useAuth()
+
+  if(to.name === 'sharedviewer') {
+    return next()
+  }
 
   if (to.name === 'auth' || to.name === 'login') {
     if (authReady.value && user.value) {

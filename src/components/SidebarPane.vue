@@ -9,11 +9,6 @@
         <Favicon width="30" height="30" alt="WebNote"/>
         <h1 class="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 tracking-tight flex-1">WebNote</h1>
 
-        <div v-if="showAuthBadge" class="md:hidden flex items-center gap-2 rounded-full bg-slate-900/5 px-2 py-1 text-[10px] font-medium text-slate-600 border border-slate-200/80">
-          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-          <span>{{ authUser?.displayName || 'Google User' }}</span>
-        </div>
-
         <!-- 新規フォルダボタン -->
         <button
           @click="startCreateFolder"
@@ -209,13 +204,31 @@
         </Transition>
       </div>
     </div>
+
+    <div v-if="props.user" class="shrink-0 border-t border-white/70 p-3">
+      <button
+        @click="emit('logout')"
+        title="ログアウト"
+        class="flex w-full items-center gap-3 rounded-xl border border-white/80 bg-white/70 px-3 py-2.5 text-left shadow-sm transition-colors hover:bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-300"
+      >
+        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-700">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M5 21a7 7 0 0 1 14 0" />
+          </svg>
+        </span>
+        <span class="min-w-0 flex-1">
+          <span class="block truncate text-sm font-semibold text-slate-700">{{ props.user.displayName || 'Google User' }}</span>
+          <span class="block text-xs text-slate-500">ログアウト</span>
+        </span>
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick, computed, onMounted } from 'vue'
-import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from '../firebase'
+import { ref, nextTick, computed } from 'vue'
+import router from '../router'
 import { useNotesStore } from '../store/notes'
 import SearchSuggestions from './SearchSuggestions.vue'
 import { formatDate } from '../utils/noteUtil.js'
@@ -224,20 +237,16 @@ import SearchIcon from '../assets/icons/magnifying-glass-solid-full.svg'
 import PlusIcon from '../assets/icons/square-plus-regular-full.svg'
 
 const store = useNotesStore()
+const props = defineProps({
+  user: { type: Object, default: null },
+})
+const emit = defineEmits(['logout'])
 
-const authUser = ref(null)
 const searchFocused = ref(false)
 const newFolderName = ref('')
 const newFolderInput = ref(null)
 
 const mobileVisible = computed(() => store.mobileView === 'sidebar')
-const showAuthBadge = computed(() => !!authUser.value && mobileVisible.value)
-
-onMounted(() => {
-  onAuthStateChanged(auth, (user) => {
-    authUser.value = user
-  })
-})
 
 function handleSearchBlur() {
   setTimeout(() => {
@@ -259,8 +268,6 @@ function handleSelectNote(note) {
     router.push('/whiteboard')
     return
   }
-
-  router.push('/home')
 }
 
 function handleNewFolderKey(e) {

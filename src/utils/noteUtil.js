@@ -16,7 +16,7 @@ export function extractUrls(text) {
 
 export function linkify(text) {
   if (!text)
-    return '<span class="text-slate-400/80 italic">ここにアイデアを書き留めましょう...</span>'
+    return '<span class="text-slate-400/80 italic"></span>'
   let escaped = escapeHTML(text)
   const urlRegex = /(https?:\/\/[^\s]+)/g
   escaped = escaped.replace(urlRegex, (url) => {

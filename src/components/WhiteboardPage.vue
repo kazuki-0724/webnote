@@ -1,5 +1,6 @@
 <template>
   <div class="relative h-screen w-screen overflow-hidden bg-slate-50 text-slate-800" style="font-family: 'Inter', sans-serif;">
+    <ShareModalConfirm />
     <WhiteboardCanvas
       v-if="store.selectedNote"
       :note="store.selectedNote"
@@ -16,6 +17,7 @@ import { computed, watch } from 'vue'
 import { onBeforeRouteLeave, useRouter } from 'vue-router'
 import { useNotesStore } from '../store/notes'
 import WhiteboardCanvas from './WhiteboardCanvas.vue'
+import ShareModalConfirm from './ShareModalConfirm.vue'
 
 const router = useRouter()
 const store = useNotesStore()

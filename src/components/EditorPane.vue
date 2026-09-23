@@ -58,15 +58,31 @@
           </div>
         </div>
 
-        <!-- 削除ボタン -->
-        <button
-          v-show="!store.isEditingContent"
-          @click="store.openDeleteConfirm('note', store.selectedNoteId)"
-          class="p-2.5 text-slate-400 hover:text-red-500 hover:bg-white rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-red-300 shadow-sm border border-transparent hover:border-white"
-          title="削除"
-        >
-          <TrashCanIcon class="w-5 h-5" />
-        </button>
+        <div class="flex shrink-0 items-center gap-2">
+          <button
+            @click="handleShareToggle"
+            class="flex items-center gap-2 rounded-xl border border-white/80 px-3 py-2 text-[13px] font-semibold shadow-sm transition-colors hover:bg-sky-50 hover:text-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300"
+            :class="store.sharedState ? 'bg-sky-50 text-sky-700' : 'bg-white/70 text-slate-600'"
+            :title="store.sharedState ? '共有設定を開く' : 'ノートを共有する'"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
+              <circle cx="18" cy="5" r="3" />
+              <circle cx="6" cy="12" r="3" />
+              <circle cx="18" cy="19" r="3" />
+              <path d="m8.7 10.7 6.6-4.4M8.7 13.3l6.6 4.4" />
+            </svg>
+            <!-- <span>{{ store.sharedState ? '共有中' : '共有' }}</span> -->
+          </button>
+
+          <button
+            v-show="!store.isEditingContent"
+            @click="store.openDeleteConfirm('note', store.selectedNoteId)"
+            class="rounded-xl border border-white/80 bg-white/70 p-2.5 text-slate-400 shadow-sm transition-colors hover:bg-white hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-300"
+            title="削除"
+          >
+            <TrashCanIcon class="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       <!-- エディタ本体 -->
@@ -117,7 +133,7 @@
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
 import { useNotesStore } from '../store/notes'
-import { formatDate, linkify, extractUrls } from '../utils/noteUtil'
+import { formatDate, linkify } from '../utils/noteUtil'
 import NoteIcon from '../assets/icons/note-icon.svg'
 import ArrowLeftIcon from '../assets/icons/arrow-left-solid-full.svg'
 import ChevronDownIcon from '../assets/icons/chevron-down-solid-full.svg'
@@ -125,13 +141,7 @@ import TrashCanIcon from '../assets/icons/trash-can-solid-full.svg'
 
 const store = useNotesStore()
 const textareaRef = ref(null)
-
 const mobileVisible = computed(() => store.mobileView === 'editor')
-
-const linkChips = computed(() => {
-  const content = store.selectedNote?.content || ''
-  return [...new Set(extractUrls(content))]
-})
 
 watch(
   () => store.isEditingContent,
@@ -142,4 +152,14 @@ watch(
     }
   }
 )
+
+watch(
+  () => store.selectedNoteId,
+  { immediate: true }
+)
+
+async function handleShareToggle() {
+  await store.handleShareToggle()
+}
+
 </script>

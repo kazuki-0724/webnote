@@ -1,9 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { updateDoc, doc } from 'firebase/firestore'
 import { db } from '../firebase'
 import { folderRepository } from '../repositories/folderRepository'
 import { notesRepository } from '../repositories/notesRepository'
+import { sharedRepository } from '../repositories/sharedRepository'
+import { encodeShareToken } from '../utils/shareToken'
 
 const PENDING_SYNC_STORAGE_PREFIX = 'webnote_pending_sync:'
 
@@ -23,10 +26,13 @@ export const useNotesStore = defineStore('notes', () => {
   const mobileView = ref('sidebar')
   const isCreatingFolder = ref(false)
   const isEditingContent = ref(false)
-  
+
   const expandedFolderIds = ref(['general', 'f1', 'f2'])
   const deleteConfirm = ref({ isOpen: false, type: null, targetId: null })
+  const shareConfirm = ref({ isOpen: false, noteId: null })
   const searchQuery = ref('')
+  const sharedState = ref(false)
+  const router = useRouter()
 
   const selectedNote = computed(
     () => getNoteById(selectedNoteId.value) || null
@@ -181,9 +187,11 @@ export const useNotesStore = defineStore('notes', () => {
     unsubscribeNotes = notesRepository.subscribeToNotes(uid, (nextNotes) => {
       notes.value = nextNotes
     })
-    
+
     console.log('Notes store initialized')
     console.log('Folders:', folders.value.length, 'Notes:', notes.value.length)
+
+    sharedState.value = false
   }
 
   function toggleFolderExpansion(id) {
@@ -199,7 +207,7 @@ export const useNotesStore = defineStore('notes', () => {
     return expandedFolderIds.value.includes(id)
   }
 
-  function selectNote(id) {
+  async function selectNote(id) {
     flushPendingSaves()
 
     const note = getNoteById(id)
@@ -209,6 +217,10 @@ export const useNotesStore = defineStore('notes', () => {
     }
     isEditingContent.value = false
     mobileView.value = 'editor'
+
+    if (note) {
+      sharedState.value = await isNoteShared(note.id)
+    }
   }
 
   function openCreateNoteModal(folderId = selectedFolderId.value) {
@@ -261,6 +273,22 @@ export const useNotesStore = defineStore('notes', () => {
     closeDeleteConfirm()
   }
 
+  function openShareConfirm(noteId) {
+    shareConfirm.value = { isOpen: true, noteId }
+  }
+
+  function closeShareConfirm() {
+    shareConfirm.value = { isOpen: false, noteId: null }
+  }
+
+  function confirmShare() {
+    const { noteId } = shareConfirm.value
+    if (noteId) {
+      // Implement the logic to share the note
+    }
+    closeShareConfirm()
+  }
+
   function createFolder(folderName) {
     const folder = { id: `f${Date.now()}`, name: folderName }
     folderRepository.createFolder(currentUserId.value, folder)
@@ -275,7 +303,7 @@ export const useNotesStore = defineStore('notes', () => {
 
   function createNote(folderId, type = 'note', title) {
 
-    const resolvedTitle =  title?.trim() || (type === 'note' ? '新しいノート' : '新しいホワイトボード')
+    const resolvedTitle = title?.trim() || (type === 'note' ? '新しいノート' : '新しいホワイトボード')
 
     title = resolvedTitle
 
@@ -297,7 +325,7 @@ export const useNotesStore = defineStore('notes', () => {
             lastSavedAt: Date.now(),
           }
         }
-      : {})
+        : {})
     }
     notesRepository.createNote(currentUserId.value, note)
       .then(() => {
@@ -305,7 +333,7 @@ export const useNotesStore = defineStore('notes', () => {
         selectedFolderId.value = folderId
         selectNote(note.id)
       })
-      .catch((err) => console.error('Failed to create note:', err))   
+      .catch((err) => console.error('Failed to create note:', err))
   }
 
   function pointToSegmentDistance(point, start, end) {
@@ -546,9 +574,68 @@ export const useNotesStore = defineStore('notes', () => {
   function getNoteById(noteId) {
     return notes.value.find((n) => n.id === noteId)
   }
-  
+
   function getFolderById(folderId) {
     return folders.value.find((f) => f.id === folderId)
+  }
+
+  async function toggleShareNote(noteId) {
+    if (!noteId || !currentUserId.value) return false
+
+    const currentlyShared = await isNoteShared(noteId)
+
+    if (currentlyShared) {
+      await sharedRepository.removeSharedNote(currentUserId.value, noteId)
+    } else {
+      await sharedRepository.insertSharedNote(currentUserId.value, noteId)
+    }
+
+    return await isNoteShared(noteId)
+  }
+
+  async function shareNote(noteId, callback) {
+    console.log('Sharing note:', noteId, currentUserId.value)
+    const nextState = await toggleShareNote(noteId)
+    if (typeof callback === 'function') {
+      callback(nextState)
+    }
+    return nextState
+  }
+
+  async function isNoteShared(noteId) {
+    console.log('Checking if note is shared:', noteId, currentUserId.value)
+    const isShared = await sharedRepository.isShared(currentUserId.value, noteId)
+    console.log('Is note shared:', isShared)
+    return Boolean(isShared)
+  }
+
+  function getShareToken() {
+    if (!selectedNoteId.value || !currentUserId.value) return ''
+    return encodeShareToken(currentUserId.value, selectedNoteId.value)
+  }
+
+  function getShareUrl() {
+    const token = getShareToken()
+    const route = router.resolve({ 
+      name: 'sharedviewer',
+      query: { id: token }
+    })
+    return new URL(route.href, window.location.origin).href
+  }
+
+  async function handleShareToggle() {
+      openShareConfirm(selectedNoteId.value)
+  }
+
+  async function startSharing() {
+    if (!selectedNoteId.value) return
+    sharedState.value = await toggleShareNote(selectedNoteId.value)
+  }
+
+  async function stopSharing() {
+    if (!selectedNoteId.value) return
+    sharedState.value = await toggleShareNote(selectedNoteId.value)
+    closeShareConfirm()
   }
 
   return {
@@ -563,7 +650,9 @@ export const useNotesStore = defineStore('notes', () => {
     isEditingContent,
     expandedFolderIds,
     deleteConfirm,
+    shareConfirm,
     searchQuery,
+    sharedState,
     // computed
     selectedNote,
     selectedFolder,
@@ -586,6 +675,13 @@ export const useNotesStore = defineStore('notes', () => {
     openDeleteConfirm,
     closeDeleteConfirm,
     confirmDelete,
+    getShareToken,
+    openShareConfirm,
+    closeShareConfirm,
+    confirmShare,
+    startSharing,
+    stopSharing,
+    getShareUrl,
     createFolder,
     deleteFolder,
     createNote,
@@ -595,5 +691,9 @@ export const useNotesStore = defineStore('notes', () => {
     updateNoteTitle,
     updateNoteContent,
     deleteNote,
+    shareNote,
+    toggleShareNote,
+    isNoteShared,
+    handleShareToggle,
   }
 })

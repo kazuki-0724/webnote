@@ -1,6 +1,5 @@
 import { collection, getDocs, updateDoc, doc, setDoc, deleteDoc, onSnapshot } from 'firebase/firestore'
 import { db } from '../firebase'
-import { FIRESTORE_COLLECTIONS } from '../constrants/firestore'
 
 export const notesRepository = {
   async fetchAllNotes(uid) {
