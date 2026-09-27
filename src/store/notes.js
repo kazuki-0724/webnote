@@ -23,6 +23,7 @@ export const useNotesStore = defineStore('notes', () => {
   const selectedNoteId = ref('n1')
   const selectedFolderId = ref('all')
   const isCreateNoteModalOpen = ref(false)
+  const isUpdateFolderModalOpen = ref(false)
   const mobileView = ref('sidebar')
   const isCreatingFolder = ref(false)
   const isEditingContent = ref(false)
@@ -231,6 +232,15 @@ export const useNotesStore = defineStore('notes', () => {
   function closeCreateNoteModal() {
     isCreateNoteModalOpen.value = false
   }
+  
+  function openUpdateFolderModal(folderId) {
+    selectedFolderId.value = folderId || 'general'
+    isUpdateFolderModalOpen.value = true
+  }
+  
+  function closeUpdateFolderModal() {
+    isUpdateFolderModalOpen.value = false
+  }
 
   function setMobileView(view) {
     mobileView.value = view
@@ -271,6 +281,7 @@ export const useNotesStore = defineStore('notes', () => {
     if (type === 'note') deleteNote(targetId)
     else if (type === 'folder') deleteFolder(targetId)
     closeDeleteConfirm()
+    setMobileView('sidebar')
   }
 
   function openShareConfirm(noteId) {
@@ -299,6 +310,15 @@ export const useNotesStore = defineStore('notes', () => {
   function deleteFolder(folderId) {
     folderRepository.deleteFolder(currentUserId.value, folderId)
       .catch((err) => console.error('Failed to delete folder:', err))
+  }
+
+  function updateFolderName(folderId, folderName) {
+    folderRepository.updateFolderName(currentUserId.value, folderId, folderName)
+      .catch((err) => console.error('Failed to update folder name:', err))
+  }
+
+  function getFolderById(folderId) {
+    return store.folders.find(f => f.id === folderId)
   }
 
   function createNote(folderId, type = 'note', title) {
@@ -645,6 +665,7 @@ export const useNotesStore = defineStore('notes', () => {
     selectedNoteId,
     selectedFolderId,
     isCreateNoteModalOpen,
+    isUpdateFolderModalOpen,
     mobileView,
     isCreatingFolder,
     isEditingContent,
@@ -667,6 +688,8 @@ export const useNotesStore = defineStore('notes', () => {
     selectNote,
     openCreateNoteModal,
     closeCreateNoteModal,
+    openUpdateFolderModal,
+    closeUpdateFolderModal,
     setMobileView,
     moveNote,
     flushPendingSaves,
@@ -684,6 +707,8 @@ export const useNotesStore = defineStore('notes', () => {
     getShareUrl,
     createFolder,
     deleteFolder,
+    updateFolderName,
+    getFolderById,
     createNote,
     drawPicture,
     saveWhiteboardStroke,

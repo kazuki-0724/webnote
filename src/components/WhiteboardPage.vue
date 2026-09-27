@@ -17,7 +17,7 @@ import { computed, watch } from 'vue'
 import { onBeforeRouteLeave, useRouter } from 'vue-router'
 import { useNotesStore } from '../store/notes'
 import WhiteboardCanvas from './WhiteboardCanvas.vue'
-import ShareModalConfirm from './ShareModalConfirm.vue'
+import ShareModalConfirm from './ShareConfirmModal.vue'
 
 const router = useRouter()
 const store = useNotesStore()

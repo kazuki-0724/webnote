@@ -7,6 +7,7 @@
         <ModalCreateNote />
         <DeleteModalConfirm />
         <ShareModalConfirm />
+        <UpdateFolderNameModal />
     </div>
 </template>
 
@@ -17,9 +18,10 @@ import { useNotesStore } from '../store/notes'
 import { useAuth } from '../composables/useAuth'
 import SidebarPane from './SidebarPane.vue'
 import EditorPane from './EditorPane.vue'
-import ModalCreateNote from './ModalCreateNote.vue'
-import DeleteModalConfirm from './DeleteModalConfirm.vue'
-import ShareModalConfirm from './ShareModalConfirm.vue'
+import ModalCreateNote from './CreateNoteModal.vue'
+import DeleteModalConfirm from './DeleteConfirmModal.vue'
+import ShareModalConfirm from './ShareConfirmModal.vue'
+import UpdateFolderNameModal from './UpdateFolderNameModal.vue'
 
 const router = useRouter()
 const { user, initializeAuth, logoutWithGoogle } = useAuth()

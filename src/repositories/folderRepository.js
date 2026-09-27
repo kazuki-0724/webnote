@@ -1,4 +1,4 @@
-import { collection, getDocs, doc, setDoc, deleteDoc, onSnapshot } from 'firebase/firestore'
+import { collection, getDocs, doc, setDoc, deleteDoc, onSnapshot, updateDoc } from 'firebase/firestore'
 import { db } from '../firebase'
 import { notesRepository } from '../repositories/notesRepository'
 
@@ -46,6 +46,12 @@ export const folderRepository = {
     if (!uid) return Promise.resolve([])
     await notesRepository.deleteAllNotesInFolder(uid, id)
     await deleteDoc(doc(db, 'users', uid, `folders`, id))
+  },
+
+  async updateFolderName(uid, folderId, folderName) {
+    if (!uid) return Promise.resolve([])
+    const data = { name: folderName }
+    await updateDoc(doc(db, 'users', uid, `folders`, folderId), data)
   },
 }
 

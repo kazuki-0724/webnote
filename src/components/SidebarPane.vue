@@ -39,7 +39,7 @@
     </div>
 
     <!-- ===== ツリー本体 ===== -->
-    <div class="flex-1 overflow-y-auto px-3 pb-4">
+    <div class="sidebar-tree-scroll flex-1 overflow-y-auto px-3 pb-4">
 
       <!-- 新規フォルダ入力行 -->
       <div
@@ -70,134 +70,176 @@
       >
         <!-- フォルダヘッダー行 -->
         <div
-          class="group flex items-center gap-1.5 px-2 py-2 rounded-xl cursor-pointer transition-all hover:bg-white/60 select-none"
-          @click="store.toggleFolderExpansion(folder.id)"
+          class="group/folder flex items-center rounded-xl border-l-2 transition-colors"
+          :class="store.isFolderExpanded(folder.id)
+            ? 'border-sky-400 bg-sky-50/70'
+            : 'border-transparent hover:bg-white/60'"
         >
-          <!-- 展開/折りたたみ矢印 -->
-          <span
-            class="text-slate-400 transition-transform duration-200 shrink-0"
-            :class="store.isFolderExpanded(folder.id) ? 'rotate-90' : 'rotate-0'"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="m9 18 6-6-6-6"/>
-            </svg>
-          </span>
-
-          <!-- フォルダアイコン -->
-          <span :class="store.isFolderExpanded(folder.id) ? 'text-sky-500' : 'text-slate-400'" class="shrink-0 transition-colors">
-            <svg v-if="store.isFolderExpanded(folder.id)" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-              <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/>
-            </svg>
-            <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/>
-            </svg>
-          </span>
-
-          <!-- フォルダ名 -->
-          <span class="flex-1 text-[13.5px] font-semibold text-slate-700 truncate">{{ folder.name }}</span>
-
-          <!-- ノート数バッジ -->
-          <span
-            v-if="(store.notesByFolder[folder.id] || []).length > 0"
-            class="text-[10px] font-bold text-slate-400 bg-slate-100/80 px-1.5 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            {{ (store.notesByFolder[folder.id] || []).length }}
-          </span>
-
-          <!-- 新規ノートボタン -->
           <button
-            @click.stop="store.openCreateNoteModal(folder.id)"
-            title="ノートを作成"
-            class="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-all focus:outline-none focus:opacity-100 focus:ring-2 focus:ring-sky-300 shrink-0"
+            type="button"
+            :aria-expanded="store.isFolderExpanded(folder.id)"
+            :aria-controls="`folder-notes-${folder.id}`"
+            :title="store.isFolderExpanded(folder.id) ? 'フォルダを折りたたむ' : 'フォルダを展開'"
+            class="flex min-w-0 flex-1 items-center gap-1.5 rounded-lg px-1.5 py-2 text-left select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-300"
+            @click="store.toggleFolderExpansion(folder.id)"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M5 12h14"/><path d="M12 5v14"/>
-            </svg>
+            <!-- 展開/折りたたみ矢印 -->
+            <span
+              aria-hidden="true"
+              class="shrink-0 text-slate-400 transition-transform duration-200"
+              :class="store.isFolderExpanded(folder.id) ? 'rotate-90' : 'rotate-0'"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m9 18 6-6-6-6"/>
+              </svg>
+            </span>
+
+            <!-- フォルダアイコン -->
+            <span class="relative flex h-5 w-5 shrink-0 items-center justify-center">
+              <span
+                aria-hidden="true"
+                :class="store.isFolderExpanded(folder.id) ? 'text-sky-600' : 'text-slate-400'"
+                class="transition-colors"
+              >
+                <svg v-if="store.isFolderExpanded(folder.id)" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                  <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/>
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/>
+                </svg>
+              </span>
+              <span
+                class="absolute -bottom-0.5 -right-1 inline-flex h-3 min-w-3 items-center justify-center rounded-full bg-slate-600 px-0.5 text-[8px] font-bold leading-none tabular-nums text-white ring-1 ring-white"
+              >
+                {{ (store.notesByFolder[folder.id] || []).length }}
+              </span>
+            </span>
+
+            <!-- フォルダ名 -->
+            <span class="min-w-0 flex-1 truncate text-[13.5px] font-semibold text-slate-700">{{ folder.name }}</span>
+
           </button>
 
-          <!-- フォルダ削除ボタン（general以外） -->
-          <button
-            v-if="folder.id !== 'general'"
-            @click.stop="store.openDeleteConfirm('folder', folder.id)"
-            title="フォルダを削除"
-            class="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all focus:outline-none focus:opacity-100 focus:ring-2 focus:ring-red-300 shrink-0"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-            </svg>
-          </button>
+          <div class="folder-actions flex shrink-0 items-center pr-1">
+            <!-- 新規ノートボタン -->
+            <button
+              type="button"
+              @click="store.openCreateNoteModal(folder.id)"
+              title="ノートを作成"
+              aria-label="ノートを作成"
+              class="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 shrink-0 opacity-0 group-hover/folder:opacity-100 group-focus-within/folder:opacity-100"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 12h14"/><path d="M12 5v14"/>
+              </svg>
+            </button>
+
+            <!-- フォルダ名更新ボタン -->
+            <button
+              type="button"
+              @click="store.openUpdateFolderModal(folder.id)"
+              title="フォルダ名を更新"
+              aria-label="フォルダ名を更新"
+              class="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 shrink-0 opacity-0 group-hover/folder:opacity-100 group-focus-within/folder:opacity-100"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
+                <path d="M15.5 3.5a2.1 2.1 0 1 1 3 3L7 18l-4 1 1-4 11.5-11.5Z"/>
+                <path d="m12 8 4 4"/>
+              </svg>
+            </button>
+
+            <!-- フォルダ削除ボタン（general以外） -->
+            <button
+              v-if="folder.id !== 'general'"
+              type="button"
+              @click="store.openDeleteConfirm('folder', folder.id)"
+              title="フォルダを削除"
+              aria-label="フォルダを削除"
+              class="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300 shrink-0 opacity-0 group-hover/folder:opacity-100 group-focus-within/folder:opacity-100"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+              </svg>
+            </button>
+            <span v-else aria-hidden="true" class="h-7 w-7 shrink-0"></span>
+          </div>
         </div>
 
         <!-- ノートリスト（展開時） -->
         <Transition name="tree-expand">
           <div
             v-if="store.isFolderExpanded(folder.id)"
-            class="ml-3 pl-3 border-l-2 border-slate-100 mb-1"
+            :id="`folder-notes-${folder.id}`"
+            class="tree-expand-grid"
           >
-            <!-- ノートなし -->
-            <div
-              v-if="(store.notesByFolder[folder.id] || []).length === 0"
-              class="py-2 px-2 text-[12px] text-slate-400 italic"
-            >
-              ノートがありません
-            </div>
-
-            <!-- ノート行 -->
-            <div
-              v-for="note in store.notesByFolder[folder.id]"
-              :key="note.id"
-              @click="handleSelectNote(note)"
-              class="group/note flex items-start gap-2 px-2.5 py-2 rounded-xl cursor-pointer transition-all duration-200 mb-0.5 relative"
-              :class="store.selectedNoteId === note.id
-                ? 'bg-gradient-to-r from-sky-500/10 to-blue-500/5 shadow-sm ring-1 ring-sky-200/60'
-                : 'hover:bg-white/70'"
-            >
-              <!-- アクティブインジケーター -->
-              <div
-                v-if="store.selectedNoteId === note.id"
-                class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-[17px] w-0.5 h-5 bg-sky-500 rounded-full"
-              ></div>
-
-              <!-- ノートアイコン -->
-              <span
-                class="mt-0.5 shrink-0 transition-colors"
-                :class="store.selectedNoteId === note.id ? 'text-sky-500' : 'text-slate-300 group-hover/note:text-slate-400'"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                  <polyline points="14 2 14 8 20 8"/>
-                  <line x1="16" y1="13" x2="8" y2="13"/>
-                  <line x1="16" y1="17" x2="8" y2="17"/>
-                </svg>
-              </span>
-
-              <!-- ノート情報 -->
-              <div class="flex-1 min-w-0">
+            <div class="min-h-0 overflow-hidden">
+              <div class="ml-3 pl-3 border-l-2 border-slate-200/80 mb-1">
+                <!-- ノートなし -->
                 <div
-                  class="text-[13px] font-medium truncate leading-tight transition-colors"
-                  :class="store.selectedNoteId === note.id ? 'text-sky-700' : 'text-slate-700 group-hover/note:text-slate-900'"
+                  v-if="(store.notesByFolder[folder.id] || []).length === 0"
+                  class="py-2 px-2 text-[12px] text-slate-400 italic"
                 >
-                  {{ note.title || '無題のノート' }}
+                  ノートがありません
                 </div>
-                <div class="text-[11px] text-slate-400 mt-0.5 truncate leading-tight">
-                  {{ note.content ? note.content.slice(0, 40).replace(/\n/g, ' ') : '本文なし' }}
-                </div>
-              </div>
 
-              <!-- 時刻 + 削除 -->
-              <div class="shrink-0 flex flex-col items-end gap-1">
-                <span class="text-[10px] text-slate-400">{{ formatDate(note.updatedAt) }}</span>
-                <button
-                  @click.stop="store.openDeleteConfirm('note', note.id)"
-                  class="opacity-0 group-hover/note:opacity-100 w-5 h-5 flex items-center justify-center text-slate-300 hover:text-red-400 rounded-md transition-all focus:outline-none focus:opacity-100"
-                  title="削除"
+                <!-- ノート行 -->
+                <div
+                  v-for="note in store.notesByFolder[folder.id]"
+                  :key="note.id"
+                  @click="handleSelectNote(note)"
+                  class="group/note flex items-start gap-2 px-2.5 py-2 rounded-xl cursor-pointer transition-all duration-200 mb-0.5 relative"
+                  :class="store.selectedNoteId === note.id
+                    ? 'bg-gradient-to-r from-sky-500/10 to-blue-500/5 shadow-sm ring-1 ring-sky-200/60'
+                    : 'hover:bg-white/70'"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                  </svg>
-                </button>
+                  <!-- アクティブインジケーター -->
+                  <div
+                    v-if="store.selectedNoteId === note.id"
+                    class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-[17px] w-0.5 h-5 bg-sky-500 rounded-full"
+                  ></div>
+
+                  <!-- ノートアイコン -->
+                  <span
+                    class="mt-0.5 shrink-0 transition-colors"
+                    :class="store.selectedNoteId === note.id ? 'text-sky-500' : 'text-slate-300 group-hover/note:text-slate-400'"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                      <line x1="16" y1="13" x2="8" y2="13"/>
+                      <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                  </span>
+
+                  <!-- ノート情報 -->
+                  <div class="flex-1 min-w-0">
+                    <div
+                      class="text-[13px] font-medium truncate leading-tight transition-colors"
+                      :class="store.selectedNoteId === note.id ? 'text-sky-700' : 'text-slate-700 group-hover/note:text-slate-900'"
+                    >
+                      {{ note.title || '無題のノート' }}
+                    </div>
+                    <div class="text-[11px] text-slate-400 mt-0.5 truncate leading-tight">
+                      {{ note.content ? note.content.slice(0, 40).replace(/\n/g, ' ') : '本文なし' }}
+                    </div>
+                  </div>
+
+                  <!-- 時刻 + 削除 -->
+                  <div class="shrink-0 flex flex-col items-end gap-1">
+                    <span class="text-[10px] text-slate-400">{{ formatDate(note.updatedAt) }}</span>
+                    <button
+                      @click.stop="store.openDeleteConfirm('note', note.id)"
+                      class="opacity-0 group-hover/note:opacity-100 w-5 h-5 flex items-center justify-center text-slate-300 hover:text-red-400 rounded-md transition-all focus:outline-none focus:opacity-100"
+                      title="削除"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -285,17 +327,45 @@ function cancelCreateFolder() {
     newFolderName.value = ''
   }, 150)
 }
+
 </script>
 
 <style scoped>
-.tree-expand-enter-active {
-  animation: treeExpand 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+.sidebar-tree-scroll {
+  scrollbar-gutter: stable;
 }
+
+.tree-expand-grid {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+
+.tree-expand-enter-active,
 .tree-expand-leave-active {
-  animation: treeExpand 0.15s cubic-bezier(0.16, 1, 0.3, 1) reverse;
+  transition:
+    grid-template-rows 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.18s ease,
+    transform 0.18s ease;
 }
-@keyframes treeExpand {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
+
+.tree-expand-enter-from,
+.tree-expand-leave-to {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.tree-expand-enter-to,
+.tree-expand-leave-from {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tree-expand-enter-active,
+  .tree-expand-leave-active {
+    transition: none;
+  }
 }
 </style>

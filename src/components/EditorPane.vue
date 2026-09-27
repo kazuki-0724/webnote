@@ -71,7 +71,6 @@
               <circle cx="18" cy="19" r="3" />
               <path d="m8.7 10.7 6.6-4.4M8.7 13.3l6.6 4.4" />
             </svg>
-            <!-- <span>{{ store.sharedState ? '共有中' : '共有' }}</span> -->
           </button>
 
           <button
