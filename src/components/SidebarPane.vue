@@ -1,26 +1,34 @@
 <template>
   <div
-    class="flex-col shrink-0 bg-white/40 backdrop-blur-xl border-r border-white/60 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.08)] z-20 transition-all duration-300"
-    :class="mobileVisible ? 'flex w-full md:w-80' : 'hidden md:flex md:w-80'"
+    class="fixed left-1/2 top-1/2 z-40 flex h-[min(46rem,calc(100dvh-2rem))] w-[min(88vw,24rem)] shrink-0 -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-white/70 bg-white/65 shadow-[inset_0_1px_1px_rgba(255,255,255,0.95),0_12px_32px_rgba(37,99,235,0.12),0_2px_10px_rgba(15,23,42,0.05)] backdrop-blur-sm transition-[transform,opacity] duration-300 md:pointer-events-auto md:static md:inset-auto md:z-20 md:h-full md:w-80 md:translate-x-0 md:translate-y-0 md:scale-100 md:border-white/60 md:bg-white/90 md:shadow-[0_14px_44px_rgba(37,99,235,0.08),0_2px_10px_rgba(0,0,0,0.03)] md:backdrop-blur-xl md:opacity-100"
+    :class="mobileVisible ? 'pointer-events-auto scale-100 opacity-100' : 'pointer-events-none scale-95 opacity-0'"
   >
     <!-- ===== ヘッダー ===== -->
-    <div class="px-5 pt-5 pb-3 shrink-0">
-      <div class="flex items-center gap-3 mb-5">
-        <Favicon width="30" height="30" alt="WebNote"/>
-        <h1 class="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 tracking-tight flex-1">WebNote</h1>
+    <div class="shrink-0 border-b border-slate-100/80 bg-white/40 px-4 py-4">
+      <div class="mb-4 flex items-center gap-2.5">
+        <Favicon width="34" height="34" alt="WebNote"/>
+        <div class="min-w-0 flex-1">
+          <h1 class="text-base font-bold tracking-tight text-slate-900">WebNote</h1>
+          <p class="mt-0.5 text-[11px] font-medium text-slate-400">Workspace</p>
+        </div>
 
         <!-- 新規フォルダボタン -->
         <button
+          type="button"
           @click="startCreateFolder"
           title="新規フォルダ"
-          class="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-sky-300"
+          aria-label="新規フォルダ"
+          class="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200/70 bg-white/80 text-slate-500 transition-colors hover:border-sky-200 hover:bg-sky-50 hover:text-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-300"
         >
-          <PlusIcon alt="新規フォルダ"/>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true">
+            <path d="M3.5 8A1.5 1.5 0 0 1 5 6.5h4l2 2h8A1.5 1.5 0 0 1 20.5 10v8A1.5 1.5 0 0 1 19 19.5H5A1.5 1.5 0 0 1 3.5 18z" />
+            <path d="M15 12v5m-2.5-2.5h5" />
+          </svg>
         </button>
       </div>
 
       <!-- 検索バー -->
-      <div class="relative group z-50">
+      <div class="group relative z-50">
         <span class="absolute left-3.5 top-0 bottom-0 z-10 flex items-center justify-center text-slate-400 transition-colors group-focus-within:text-sky-500 pointer-events-none">
           <!-- 💡 修正2: クラスでサイズ(w-4 h-4)を指定 -->
           <SearchIcon class="w-4 h-4" />
@@ -32,7 +40,7 @@
           v-model="store.searchQuery"
           @focus="searchFocused = true"
           @blur="handleSearchBlur"
-          class="w-full pl-9 pr-4 py-2.5 bg-white/70 backdrop-blur-md rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-sky-400/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] placeholder-slate-400 text-slate-800 select-text border border-white/50 focus:border-sky-300"
+          class="w-full rounded-xl border border-transparent bg-slate-100/70 py-2.5 pl-9 pr-3 text-sm text-slate-800 shadow-none transition-all placeholder:text-slate-400 focus:border-sky-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-400/30"
         />
         <SearchSuggestions :show="searchFocused" @select="searchFocused = false" />
       </div>
@@ -72,7 +80,7 @@
         <div
           class="group/folder flex items-center rounded-xl border-l-2 transition-colors"
           :class="store.isFolderExpanded(folder.id)
-            ? 'border-sky-400 bg-sky-50/70'
+            ? 'border-sky-400 bg-transparent hover:bg-slate-50/70'
             : 'border-transparent hover:bg-white/60'"
         >
           <button
@@ -80,7 +88,7 @@
             :aria-expanded="store.isFolderExpanded(folder.id)"
             :aria-controls="`folder-notes-${folder.id}`"
             :title="store.isFolderExpanded(folder.id) ? 'フォルダを折りたたむ' : 'フォルダを展開'"
-            class="flex min-w-0 flex-1 items-center gap-1.5 rounded-lg px-1.5 py-2 text-left select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-300"
+            class="flex min-w-0 flex-1 items-center gap-1.5 rounded-lg px-2 py-2 text-left select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-300"
             @click="store.toggleFolderExpansion(folder.id)"
           >
             <!-- 展開/折りたたみ矢印 -->
@@ -174,7 +182,7 @@
             class="tree-expand-grid"
           >
             <div class="min-h-0 overflow-hidden">
-              <div class="ml-3 pl-3 border-l-2 border-slate-200/80 mb-1">
+              <div class="ml-3 mb-1 rounded-r-xl rounded-bl-xl bg-slate-100/60 pb-1 pl-3 pr-1 pt-1">
                 <!-- ノートなし -->
                 <div
                   v-if="(store.notesByFolder[folder.id] || []).length === 0"
@@ -190,15 +198,9 @@
                   @click="handleSelectNote(note)"
                   class="group/note flex items-start gap-2 px-2.5 py-2 rounded-xl cursor-pointer transition-all duration-200 mb-0.5 relative"
                   :class="store.selectedNoteId === note.id
-                    ? 'bg-gradient-to-r from-sky-500/10 to-blue-500/5 shadow-sm ring-1 ring-sky-200/60'
+                    ? 'bg-sky-50 ring-inset ring-1 ring-sky-300/70'
                     : 'hover:bg-white/70'"
                 >
-                  <!-- アクティブインジケーター -->
-                  <div
-                    v-if="store.selectedNoteId === note.id"
-                    class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-[17px] w-0.5 h-5 bg-sky-500 rounded-full"
-                  ></div>
-
                   <!-- ノートアイコン -->
                   <span
                     class="mt-0.5 shrink-0 transition-colors"
@@ -247,11 +249,11 @@
       </div>
     </div>
 
-    <div v-if="props.user" class="shrink-0 border-t border-white/70 p-3">
+    <div v-if="props.user" class="shrink-0 p-3">
       <button
         @click="emit('logout')"
         title="ログアウト"
-        class="flex w-full items-center gap-3 rounded-xl border border-white/80 bg-white/70 px-3 py-2.5 text-left shadow-sm transition-colors hover:bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-300"
+        class="flex w-full items-center gap-3 rounded-xl border border-slate-200/70 bg-white/90 px-3 py-2.5 text-left shadow-[0_4px_16px_rgba(15,23,42,0.08)] transition-colors hover:bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-300"
       >
         <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-700">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true">
@@ -276,7 +278,6 @@ import SearchSuggestions from './SearchSuggestions.vue'
 import { formatDate } from '../utils/noteUtil.js'
 import Favicon from '../assets/icons/favicon.svg'
 import SearchIcon from '../assets/icons/magnifying-glass-solid-full.svg'
-import PlusIcon from '../assets/icons/square-plus-regular-full.svg'
 
 const store = useNotesStore()
 const props = defineProps({

@@ -1,5 +1,5 @@
 <template>
-    <div class="flex h-screen w-screen items-center justify-center bg-slate-100 text-slate-800" style="font-family: 'Inter', sans-serif;">
+    <div class="flex h-screen w-screen items-center justify-center bg-slate-50 text-slate-800" style="font-family: 'Inter', sans-serif;">
     <div class="loading-card">
       <div class="signature-wrap" aria-label="WebNote" role="img">
         <svg class="signature-svg" viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg">

@@ -208,6 +208,12 @@ export const useNotesStore = defineStore('notes', () => {
     return expandedFolderIds.value.includes(id)
   }
 
+  function expandFolder(id) {
+    if (!expandedFolderIds.value.includes(id)) {
+      expandedFolderIds.value.push(id)
+    }
+  }
+
   async function selectNote(id) {
     flushPendingSaves()
 
@@ -349,7 +355,7 @@ export const useNotesStore = defineStore('notes', () => {
     }
     notesRepository.createNote(currentUserId.value, note)
       .then(() => {
-        toggleFolderExpansion(folderId)
+        expandFolder(folderId)
         selectedFolderId.value = folderId
         selectNote(note.id)
       })

@@ -1,7 +1,14 @@
 <template>
-  <div class="relative bg-slate-50 bg-mesh text-slate-800 overflow-hidden select-none h-screen w-screen antialiased" style="font-family: 'Inter', sans-serif;">
-        <div class="relative h-full w-full flex">
+  <div class="relative h-screen w-screen overflow-hidden bg-slate-50 text-slate-800 antialiased" style="font-family: 'Inter', sans-serif;">
+        <div class="relative flex h-full w-full gap-3 p-2.5 sm:gap-4 sm:p-4">
             <SidebarPane :user="user" @logout="logout" />
+            <button
+              v-if="store.mobileView === 'sidebar'"
+              type="button"
+              aria-label="サイドバーを閉じる"
+              class="fixed inset-0 z-30 bg-slate-900/20 backdrop-blur-sm md:hidden"
+              @click="store.setMobileView('editor')"
+            ></button>
             <EditorPane />
         </div>
         <ModalCreateNote />

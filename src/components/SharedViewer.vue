@@ -1,25 +1,27 @@
 <template>
-    <div class="relative min-h-screen w-full bg-sky-50">
-        <div class="absolute inset-0 bg-sky-50 z-0"></div>
+    <div class="relative min-h-screen w-full overflow-hidden bg-slate-50 text-slate-800">
+        <div class="absolute inset-0 z-0 bg-white/20"></div>
         <template v-if="sharedNote?.type === 'note'">
-            <div class="flex-1 bg-sky-50 min-w-0 transition-all duration-300 relative z-0">
+            <div class="relative z-0 flex min-h-screen min-w-0 flex-col transition-all duration-300">
                 <div
-                    class="flex-1 px-4 md:px-8 pt-3 pb-5 select-text overflow-y-auto no-scrollbar flex flex-col z-10 relative">
+                    class="relative z-10 flex flex-1 select-text flex-col overflow-y-auto px-4 pb-8 pt-8 md:px-8">
                     <div v-if="sharedNote"
-                        class="shared-viewer-title w-full flex-1 flex flex-col relative max-w-6xl mx-auto">
+                        class="shared-viewer-title relative mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-hidden rounded-2xl border border-white/80 bg-white/95 shadow-[0_14px_44px_rgba(37,99,235,0.08),0_2px_10px_rgba(0,0,0,0.03)] backdrop-blur-xl">
                         <!-- タイトル -->
                         <div
-                            class="mb-2 px-6 md:px-8 py-2 transition-all rounded-xl bg-white focus-within:shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+                            class="mb-0 px-4 py-4 transition-all md:px-8 md:py-5">
                             <div
-                                class="w-full text-2xl md:text-3xl font-bold border-none outline-none bg-transparent text-slate-800 placeholder-slate-300 focus:ring-0 p-0 tracking-tight leading-tight">
+                                class="w-full break-words text-2xl font-bold leading-tight tracking-tight text-slate-900 md:text-3xl">
                                 {{ sharedNote?.title }}
                             </div>
                         </div>
 
+                        <div class="mx-4 border-t border-slate-200/80 md:mx-8"></div>
+
                         <!-- コンテンツエリア -->
                         <div
-                            class="shared-viewer-body flex-1 flex flex-col cursor-text rounded-xl transition-all duration-300 editing-active">
-                            <div class="w-full flex-1 text-[1.05rem] md:text-[1.1rem] leading-[1.8] text-slate-700 px-6 py-4 md:px-8 md:py-5 whitespace-pre-wrap break-words"
+                            class="shared-viewer-body flex flex-1 flex-col transition-all duration-300">
+                            <div class="w-full flex-1 whitespace-pre-wrap break-words px-4 py-5 text-[1.05rem] leading-[1.8] text-slate-700 md:px-8 md:py-6 md:text-[1.1rem]"
                                 v-html="linkify(sharedNote?.content)"></div>
                         </div>
                     </div>
@@ -151,7 +153,7 @@ onBeforeUnmount(() => {
 }
 
 .shared-whiteboard-shell {
-    background: #e2e8f0;
+    background: #f1f5f9;
 }
 
 .whiteboard-surface {

@@ -5,7 +5,7 @@
         class="fixed inset-0 bg-slate-900/40 z-[60] flex items-center justify-center p-4 backdrop-blur-sm"
         @click.self="store.closeShareConfirm()">
         <div
-          class="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-white">
+          class="w-full max-w-md overflow-hidden rounded-2xl border border-white/80 bg-white/95 shadow-[0_14px_44px_rgba(37,99,235,0.08),0_2px_10px_rgba(0,0,0,0.03)] backdrop-blur-xl">
           <div class="p-7">
             <h3 class="text-xl font-bold text-slate-900 tracking-tight">
               共有設定

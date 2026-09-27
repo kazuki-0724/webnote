@@ -1,8 +1,9 @@
 <template>
-  <div class="relative h-screen w-screen overflow-hidden bg-slate-50 text-slate-800" style="font-family: 'Inter', sans-serif;">
+  <div class="relative h-screen w-screen overflow-hidden bg-slate-50 p-2.5 text-slate-800 sm:p-4" style="font-family: 'Inter', sans-serif;">
     <ShareModalConfirm />
     <WhiteboardCanvas
       v-if="store.selectedNote"
+      class="overflow-hidden rounded-2xl border border-white/80 shadow-sm"
       :note="store.selectedNote"
       @stroke-end="handleWhiteboardStroke"
       @clear-canvas="handleClearWhiteboard"
