@@ -197,6 +197,7 @@ const selectedWidth = ref(11)
 const selectedColor = ref('#111827')
 const drawMode = ref('pen')
 const panOffset = ref({ x: 0, y: 0 })
+const zoomLevel = ref(1)
 const activePointers = new Map()
 const panState = ref(null)
 const isToolBarOpen = ref(true)
@@ -304,7 +305,8 @@ const surfaceStyle = computed(() => ({
   touchAction: 'none',
   cursor: 'crosshair',
   userSelect: 'none',
-  transform: `translate(${panOffset.value.x}px, ${panOffset.value.y}px)`,
+  transform: `translate(${panOffset.value.x}px, ${panOffset.value.y}px) scale(${zoomLevel.value})`,
+  transformOrigin: 'top left',
 }))
 
 watch(
@@ -314,6 +316,7 @@ watch(
     viewportWidth.value = whiteboard.canvasWidth || 1800
     viewportHeight.value = whiteboard.canvasHeight || 1200
     panOffset.value = { x: 0, y: 0 }
+    zoomLevel.value = 1
     activePointers.clear()
     panState.value = null
   },
@@ -427,6 +430,13 @@ function getPointerMidpoint() {
   }
 }
 
+function getPointerDistance() {
+  const points = [...activePointers.values()]
+  if (points.length < 2) return 0
+
+  return Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y)
+}
+
 function shouldAllowDrawing(event) {
   const pointerType = event.pointerType || 'mouse'
 
@@ -470,8 +480,10 @@ function onPointerDown(event) {
   if (activePointers.size >= 2) {
     panState.value = {
       startMidpoint: getPointerMidpoint(),
+      startDistance: getPointerDistance(),
       startOffsetX: panOffset.value.x,
       startOffsetY: panOffset.value.y,
+      startZoom: zoomLevel.value,
     }
     currentStroke.value = null
     return
@@ -506,17 +518,23 @@ function onPointerMove(event) {
     if (!panState.value) {
       panState.value = {
         startMidpoint: getPointerMidpoint(),
+        startDistance: getPointerDistance(),
         startOffsetX: panOffset.value.x,
         startOffsetY: panOffset.value.y,
+        startZoom: zoomLevel.value,
       }
     }
 
     const midpoint = getPointerMidpoint()
-    const dx = midpoint.x - panState.value.startMidpoint.x
-    const dy = midpoint.y - panState.value.startMidpoint.y
+    const distance = getPointerDistance()
+    const scale = panState.value.startDistance > 0 ? distance / panState.value.startDistance : 1
+    const zoom = Math.min(1.5, Math.max(0.3, panState.value.startZoom * scale))
+    const anchorX = (panState.value.startMidpoint.x - panState.value.startOffsetX) / panState.value.startZoom
+    const anchorY = (panState.value.startMidpoint.y - panState.value.startOffsetY) / panState.value.startZoom
+    zoomLevel.value = zoom
     panOffset.value = {
-      x: panState.value.startOffsetX + dx,
-      y: panState.value.startOffsetY + dy,
+      x: midpoint.x - anchorX * zoom,
+      y: midpoint.y - anchorY * zoom,
     }
     return
   }
