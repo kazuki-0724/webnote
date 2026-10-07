@@ -1,10 +1,10 @@
 <template>
   <div
-    class="fixed left-1/2 top-1/2 z-40 flex h-[min(46rem,calc(100dvh-2rem))] w-[min(88vw,24rem)] shrink-0 -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-white/70 bg-white/65 shadow-[inset_0_1px_1px_rgba(255,255,255,0.95),0_12px_32px_rgba(37,99,235,0.12),0_2px_10px_rgba(15,23,42,0.05)] backdrop-blur-sm transition-[transform,opacity] duration-300 md:pointer-events-auto md:static md:inset-auto md:z-20 md:h-full md:w-80 md:translate-x-0 md:translate-y-0 md:scale-100 md:border-white/60 md:bg-white/90 md:shadow-[0_14px_44px_rgba(37,99,235,0.08),0_2px_10px_rgba(0,0,0,0.03)] md:backdrop-blur-xl md:opacity-100"
+    class="fixed left-1/2 top-1/2 z-40 flex h-[min(46rem,calc(100dvh-2rem))] w-[min(88vw,24rem)] shrink-0 -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-white/70 bg-white/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.95),0_12px_32px_rgba(37,99,235,0.12),0_2px_10px_rgba(15,23,42,0.05)] backdrop-blur-sm transition-[transform,opacity] duration-300 md:pointer-events-auto md:static md:inset-auto md:z-20 md:h-full md:w-80 md:translate-x-0 md:translate-y-0 md:scale-100 md:border-white/60 md:bg-white/90 md:shadow-[0_14px_44px_rgba(37,99,235,0.08),0_2px_10px_rgba(0,0,0,0.03)] md:backdrop-blur-xl md:opacity-100"
     :class="mobileVisible ? 'pointer-events-auto scale-100 opacity-100' : 'pointer-events-none scale-95 opacity-0'"
   >
     <!-- ===== ヘッダー ===== -->
-    <div class="shrink-0 border-b border-slate-100/80 bg-white/40 px-4 py-4">
+    <div class="shrink-0 px-4 py-4">
       <div class="mb-4 flex items-center gap-2.5">
         <Favicon width="34" height="34" alt="WebNote"/>
         <div class="min-w-0 flex-1">
@@ -18,7 +18,7 @@
           @click="startCreateFolder"
           title="新規フォルダ"
           aria-label="新規フォルダ"
-          class="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200/70 bg-white/80 text-slate-500 transition-colors hover:border-sky-200 hover:bg-sky-50 hover:text-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-300"
+          class="flex h-9 w-9 items-center justify-center rounded-xl border border-white/80 bg-white/90 text-slate-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_2px_0_rgba(148,163,184,0.28),0_4px_8px_rgba(15,23,42,0.10)] transition-[transform,box-shadow,background-color,border-color,color] duration-200 ease-out hover:border-sky-200 hover:bg-sky-50 hover:text-sky-600 hover:shadow-[inset_0_1px_0_rgba(255,255,255,1),0_2px_0_rgba(125,211,252,0.4),0_6px_12px_rgba(14,165,233,0.12)] active:scale-[0.96] active:bg-sky-100 active:duration-100 active:ease-in active:shadow-[inset_0_1px_2px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)] focus:outline-none focus:ring-2 focus:ring-sky-300"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true">
             <path d="M3.5 8A1.5 1.5 0 0 1 5 6.5h4l2 2h8A1.5 1.5 0 0 1 20.5 10v8A1.5 1.5 0 0 1 19 19.5H5A1.5 1.5 0 0 1 3.5 18z" />
@@ -80,7 +80,7 @@
         <div
           class="group/folder flex items-center rounded-xl border-l-2 transition-colors"
           :class="store.isFolderExpanded(folder.id)
-            ? 'border-sky-400 bg-transparent hover:bg-slate-50/70'
+            ? 'border-sky-400 bg-transparent bg-white/60 relative z-10 shadow-[0_2px_6px_rgba(56,189,248,0.18)]'
             : 'border-transparent hover:bg-white/60'"
         >
           <button
@@ -182,7 +182,7 @@
             class="tree-expand-grid"
           >
             <div class="min-h-0 overflow-hidden">
-              <div class="ml-3 mb-1 rounded-r-xl rounded-bl-xl bg-slate-100/60 pb-1 pl-3 pr-1 pt-1">
+              <div class="ml-3 mb-1 rounded-br-xl rounded-bl-xl bg-slate-100/60 pb-1 pl-3 pr-1 pt-2">
                 <!-- ノートなし -->
                 <div
                   v-if="(store.notesByFolder[folder.id] || []).length === 0"
@@ -253,7 +253,7 @@
       <button
         @click="emit('logout')"
         title="ログアウト"
-        class="flex w-full items-center gap-3 rounded-xl border border-slate-200/70 bg-white/90 px-3 py-2.5 text-left shadow-[0_4px_16px_rgba(15,23,42,0.08)] transition-colors hover:bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-300"
+        class="flex w-full items-center gap-3 rounded-xl border border-white/80 bg-white/90 px-3 py-2.5 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_3px_0_rgba(148,163,184,0.24),0_6px_16px_rgba(15,23,42,0.09)] transition-[transform,box-shadow,background-color,border-color] duration-200 ease-out hover:border-sky-200 hover:bg-sky-50 hover:shadow-[inset_0_1px_0_rgba(255,255,255,1),0_3px_0_rgba(125,211,252,0.4),0_8px_18px_rgba(14,165,233,0.12)] active:scale-[0.96] active:bg-sky-100 active:duration-100 active:ease-in active:shadow-[inset_0_1px_2px_rgba(15,23,42,0.10),0_1px_2px_rgba(15,23,42,0.08)] focus:outline-none focus:ring-2 focus:ring-sky-300"
       >
         <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-700">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true">
