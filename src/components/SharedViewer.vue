@@ -1,7 +1,44 @@
 <template>
     <div class="relative min-h-screen w-full overflow-hidden bg-slate-50 text-slate-800">
         <div class="absolute inset-0 z-0 bg-white/20"></div>
-        <template v-if="sharedNote?.type === 'note'">
+        <template v-if="isLoading">
+            <div class="relative z-0 flex min-h-screen min-w-0 flex-col transition-all duration-300">
+                <div class="relative z-10 flex flex-1 flex-col overflow-y-auto px-4 pb-8 pt-8 md:px-8">
+                    <div
+                        class="shared-viewer-title relative mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-hidden rounded-2xl border border-white/80 bg-white/95 shadow-[0_14px_44px_rgba(37,99,235,0.08),0_2px_10px_rgba(0,0,0,0.03)] backdrop-blur-xl"
+                        aria-busy="true"
+                    >
+                        <div class="mb-0 px-4 py-4 md:px-8 md:py-5" aria-hidden="true">
+                            <div class="h-8 w-3/4 max-w-2xl animate-pulse rounded-lg bg-slate-200/80 md:h-9"></div>
+                        </div>
+                        <div class="mx-4 border-t border-slate-200/80 md:mx-8"></div>
+                        <div class="flex flex-1 flex-col px-4 py-5 md:px-8 md:py-6" aria-hidden="true">
+                            <div class="w-full animate-pulse space-y-3">
+                                <div class="h-4 w-full rounded bg-slate-200/80"></div>
+                                <div class="h-4 w-[94%] rounded bg-slate-200/80"></div>
+                                <div class="h-4 w-[82%] rounded bg-slate-200/80"></div>
+                                <div class="h-4 w-[68%] rounded bg-slate-200/80"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template v-else-if="!sharedNote">
+            <div class="relative z-0 flex min-h-screen min-w-0 flex-col transition-all duration-300">
+                <div
+                    class="relative z-10 flex flex-1 select-text flex-col overflow-y-auto px-4 pb-8 pt-8 md:px-8">
+                    <div class="shared-viewer-title relative mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-hidden rounded-2xl border border-white/80 bg-white/95 shadow-[0_14px_44px_rgba(37,99,235,0.08),0_2px_10px_rgba(0,0,0,0.03)] backdrop-blur-xl">
+                        <div class="mb-0 px-4 py-4 transition-all md:px-8 md:py-5">
+                            <div class="w-full break-words text-2xl font-bold leading-tight tracking-tight text-slate-900 md:text-3xl">
+                                このノートは存在しません。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template v-else-if="sharedNote?.type === 'note'">
             <div class="relative z-0 flex min-h-screen min-w-0 flex-col transition-all duration-300">
                 <div
                     class="relative z-10 flex flex-1 select-text flex-col overflow-y-auto px-4 pb-8 pt-8 md:px-8">
@@ -29,7 +66,7 @@
             </div>
 
         </template>
-        <template v-if="sharedNote?.type === 'whiteboard'">
+        <template v-else-if="sharedNote?.type === 'whiteboard'">
             <div class="shared-whiteboard-shell absolute inset-0 overflow-hidden bg-slate-200">
                 <div class="relative whiteboard-surface" :style="surfaceStyle">
                     <svg :width="viewportWidth" :height="viewportHeight" class="block"
@@ -50,7 +87,7 @@
 
 <script setup>
 import { useRoute } from 'vue-router'
-import { computed, ref, watchEffect, onBeforeUnmount } from 'vue'
+import { computed, ref, watch, onBeforeUnmount } from 'vue'
 import { sharedRepository } from '../repositories/sharedRepository'
 import { notesRepository } from '../repositories/notesRepository'
 import { linkify } from '../utils/noteUtil'
@@ -62,7 +99,9 @@ const viewportHeight = ref(1200)
 const strokes = ref([])
 
 const sharedNote = ref(null)
+const isLoading = ref(true)
 let unsubscribeNote = null
+let requestVersion = 0
 
 const surfaceStyle = computed(() => ({
     width: `${viewportWidth.value}px`,
@@ -73,56 +112,71 @@ const surfaceStyle = computed(() => ({
     transform: 'translate(0, 0)',
 }))
 
-watchEffect(async () => {
+watch(sharedId, async (id) => {
+    const currentRequest = ++requestVersion
+
     if (unsubscribeNote) {
         unsubscribeNote()
         unsubscribeNote = null
     }
 
-    if (!sharedId.value) {
-        sharedNote.value = null
-        strokes.value = []
+    sharedNote.value = null
+    strokes.value = []
+
+    if (!id) {
+        isLoading.value = false
         return
     }
 
-    const fetchedNote = await sharedRepository.fetchSharedNoteById(sharedId.value)
-    if (!fetchedNote?.userId || !fetchedNote?.id) {
-        sharedNote.value = null
-        strokes.value = []
-        return
-    }
+    isLoading.value = true
 
-    sharedNote.value = fetchedNote
+    try {
+        const fetchedNote = await sharedRepository.fetchSharedNoteById(id)
+        if (currentRequest !== requestVersion) return
+        if (!fetchedNote?.userId || !fetchedNote?.id) return
 
-    if (fetchedNote.type === 'whiteboard') {
-        const whiteboard = fetchedNote.whiteboard || {}
-        viewportWidth.value = whiteboard.canvasWidth || 1800
-        viewportHeight.value = whiteboard.canvasHeight || 1200
-        strokes.value = whiteboard.strokes || []
-    } else {
-        strokes.value = []
-    }
+        sharedNote.value = fetchedNote
 
-    unsubscribeNote = notesRepository.subscribeToNote(fetchedNote.userId, fetchedNote.id, (nextNote) => {
-        if (!nextNote) {
-            sharedNote.value = null
-            strokes.value = []
-            return
-        }
-
-        sharedNote.value = nextNote
-        if (nextNote.type === 'whiteboard') {
-            const whiteboard = nextNote.whiteboard || {}
+        if (fetchedNote.type === 'whiteboard') {
+            const whiteboard = fetchedNote.whiteboard || {}
             viewportWidth.value = whiteboard.canvasWidth || 1800
             viewportHeight.value = whiteboard.canvasHeight || 1200
             strokes.value = whiteboard.strokes || []
         } else {
             strokes.value = []
         }
-    })
-})
+
+        unsubscribeNote = notesRepository.subscribeToNote(fetchedNote.userId, fetchedNote.id, (nextNote) => {
+            if (currentRequest !== requestVersion) return
+            if (!nextNote) {
+                sharedNote.value = null
+                strokes.value = []
+                return
+            }
+
+            sharedNote.value = nextNote
+            if (nextNote.type === 'whiteboard') {
+                const whiteboard = nextNote.whiteboard || {}
+                viewportWidth.value = whiteboard.canvasWidth || 1800
+                viewportHeight.value = whiteboard.canvasHeight || 1200
+                strokes.value = whiteboard.strokes || []
+            } else {
+                strokes.value = []
+            }
+        })
+    } catch (error) {
+        if (currentRequest === requestVersion) {
+            console.error('Failed to load shared note:', error)
+        }
+    } finally {
+        if (currentRequest === requestVersion) {
+            isLoading.value = false
+        }
+    }
+}, { immediate: true })
 
 onBeforeUnmount(() => {
+    requestVersion += 1
     if (unsubscribeNote) {
         unsubscribeNote()
         unsubscribeNote = null
