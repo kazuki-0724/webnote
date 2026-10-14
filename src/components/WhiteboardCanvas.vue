@@ -124,6 +124,33 @@
       </div>
     </div>
 
+    <div class="absolute bottom-3 right-3 z-10 inline-flex items-center gap-1 rounded-2xl border border-slate-200 bg-white/80 p-1.5 shadow-sm backdrop-blur-sm"
+      role="group" aria-label="ズーム操作">
+      <button type="button" @click="adjustZoom(-zoomStep)" :disabled="zoomLevel <= minZoom"
+        class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition-colors hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:cursor-not-allowed disabled:opacity-40"
+        :title="`縮小（最小 ${Math.round(minZoom * 100)}%）`" aria-label="縮小">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+          class="h-4 w-4" aria-hidden="true">
+          <circle cx="10.8" cy="10.8" r="6.8" />
+          <path d="m16 16 4.2 4.2M7.8 10.8h6" />
+        </svg>
+      </button>
+      <button type="button" @click="resetZoom"
+        class="min-w-14 rounded-xl px-2 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-sky-50 hover:text-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300"
+        title="100%に戻す">
+        {{ Math.round(zoomLevel * 100) }}%
+      </button>
+      <button type="button" @click="adjustZoom(zoomStep)" :disabled="zoomLevel >= maxZoom"
+        class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition-colors hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:cursor-not-allowed disabled:opacity-40"
+        :title="`拡大（最大 ${Math.round(maxZoom * 100)}%）`" aria-label="拡大">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+          class="h-4 w-4" aria-hidden="true">
+          <circle cx="10.8" cy="10.8" r="6.8" />
+          <path d="m16 16 4.2 4.2M7.8 10.8h6m-3-3v6" />
+        </svg>
+      </button>
+    </div>
+
     <div v-if="isColorPaletteOpen && (selectedTool === 'pen' || selectedTool === 'marker')" ref="colorPalettePopupRef"
       class="color-palette-popup" :style="colorPalettePopupStyle">
       <button v-for="color in paletteOptions[selectedTool] || []" :key="color.value" type="button"
@@ -131,7 +158,7 @@
         :title="color.label" />
     </div>
 
-    <div class="absolute inset-0 overflow-hidden">
+    <div ref="viewportRef" class="absolute inset-0 overflow-hidden">
       <div ref="surfaceRef" class="relative whiteboard-surface" :style="surfaceStyle" @pointerdown="onPointerDown"
         @pointermove="onPointerMove" @pointerup="onPointerUp" @pointerleave="onPointerUp" @pointercancel="onPointerUp">
         <svg :width="viewportWidth" :height="viewportHeight" class="block" preserveAspectRatio="xMidYMid meet">
@@ -189,6 +216,7 @@ const props = defineProps({
 const emit = defineEmits(['stroke-end', 'clear-canvas', 'back-to-top'])
 
 const surfaceRef = ref(null)
+const viewportRef = ref(null)
 const currentStroke = ref(null)
 const viewportWidth = ref(1800)
 const viewportHeight = ref(1200)
@@ -197,6 +225,10 @@ const selectedWidth = ref(11)
 const selectedColor = ref('#111827')
 const drawMode = ref('pen')
 const panOffset = ref({ x: 0, y: 0 })
+const zoomLevel = ref(1)
+const minZoom = 0.3
+const maxZoom = 1.5
+const zoomStep = 0.1
 const activePointers = new Map()
 const panState = ref(null)
 const isToolBarOpen = ref(true)
@@ -304,7 +336,8 @@ const surfaceStyle = computed(() => ({
   touchAction: 'none',
   cursor: 'crosshair',
   userSelect: 'none',
-  transform: `translate(${panOffset.value.x}px, ${panOffset.value.y}px)`,
+  transform: `translate(${panOffset.value.x}px, ${panOffset.value.y}px) scale(${zoomLevel.value})`,
+  transformOrigin: 'top left',
 }))
 
 watch(
@@ -314,6 +347,7 @@ watch(
     viewportWidth.value = whiteboard.canvasWidth || 1800
     viewportHeight.value = whiteboard.canvasHeight || 1200
     panOffset.value = { x: 0, y: 0 }
+    zoomLevel.value = 1
     activePointers.clear()
     panState.value = null
   },
@@ -427,6 +461,44 @@ function getPointerMidpoint() {
   }
 }
 
+function getPointerDistance() {
+  const points = [...activePointers.values()]
+  if (points.length < 2) return 0
+
+  return Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y)
+}
+
+function setZoom(nextZoom, anchor) {
+  const zoom = Math.min(maxZoom, Math.max(minZoom, nextZoom))
+  const anchorX = (anchor.x - panOffset.value.x) / zoomLevel.value
+  const anchorY = (anchor.y - panOffset.value.y) / zoomLevel.value
+  zoomLevel.value = zoom
+  panOffset.value = {
+    x: anchor.x - anchorX * zoom,
+    y: anchor.y - anchorY * zoom,
+  }
+}
+
+function zoomAroundViewportCenter(nextZoom) {
+  const rect = viewportRef.value?.getBoundingClientRect()
+  if (!rect) return
+
+  setZoom(nextZoom, {
+    x: rect.left + rect.width / 2,
+    y: rect.top + rect.height / 2,
+  })
+}
+
+function adjustZoom(amount) {
+  const nextZoom = Math.round((zoomLevel.value + amount) * 10) / 10
+  zoomAroundViewportCenter(nextZoom)
+}
+
+function resetZoom() {
+  zoomLevel.value = 1
+  panOffset.value = { x: 0, y: 0 }
+}
+
 function shouldAllowDrawing(event) {
   const pointerType = event.pointerType || 'mouse'
 
@@ -470,8 +542,10 @@ function onPointerDown(event) {
   if (activePointers.size >= 2) {
     panState.value = {
       startMidpoint: getPointerMidpoint(),
+      startDistance: getPointerDistance(),
       startOffsetX: panOffset.value.x,
       startOffsetY: panOffset.value.y,
+      startZoom: zoomLevel.value,
     }
     currentStroke.value = null
     return
@@ -506,17 +580,23 @@ function onPointerMove(event) {
     if (!panState.value) {
       panState.value = {
         startMidpoint: getPointerMidpoint(),
+        startDistance: getPointerDistance(),
         startOffsetX: panOffset.value.x,
         startOffsetY: panOffset.value.y,
+        startZoom: zoomLevel.value,
       }
     }
 
     const midpoint = getPointerMidpoint()
-    const dx = midpoint.x - panState.value.startMidpoint.x
-    const dy = midpoint.y - panState.value.startMidpoint.y
+    const distance = getPointerDistance()
+    const scale = panState.value.startDistance > 0 ? distance / panState.value.startDistance : 1
+    const zoom = Math.min(maxZoom, Math.max(minZoom, panState.value.startZoom * scale))
+    const anchorX = (panState.value.startMidpoint.x - panState.value.startOffsetX) / panState.value.startZoom
+    const anchorY = (panState.value.startMidpoint.y - panState.value.startOffsetY) / panState.value.startZoom
+    zoomLevel.value = zoom
     panOffset.value = {
-      x: panState.value.startOffsetX + dx,
-      y: panState.value.startOffsetY + dy,
+      x: midpoint.x - anchorX * zoom,
+      y: midpoint.y - anchorY * zoom,
     }
     return
   }
